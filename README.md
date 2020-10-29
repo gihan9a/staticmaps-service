@@ -8,7 +8,7 @@ This project is an alternative to Google Static Map API.
 
 
 ## Build status
-[![Node.js CI](https://img.shields.io/github/workflow/status/gihan10/staticmap-service/Node.js%20CI?label=Node.js%20CI)](https://github.com/gihan10/staticmap-service/actions?query=workflow%3A%22Node.js+CI%22)
+[![Node.js CI](https://img.shields.io/github/workflow/status/gihan10/staticmap-service/Node.js%20CI?label=Node.js%20CI)](https://github.com/gihan10/staticmap-service/actions?query=workflow%3A%22Node.js+CI%22) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1a4d865272044212860e5c1b1a090c26)](https://app.codacy.com/gh/gihan10/staticmap-service?utm_source=github.com&utm_medium=referral&utm_content=gihan10/staticmap-service&utm_campaign=Badge_Grade)
 
 ## Code style
 This project follows `Airbnb` javascript style guide.
