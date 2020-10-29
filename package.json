@@ -1,0 +1,37 @@
+{
+  "name": "staticmap-service",
+  "version": "1.0.0",
+  "description": "Generate static map images as a service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gihan10/staticmap-service.git"
+  },
+  "keywords": [
+    "staticmap",
+    "image",
+    "googlemap"
+  ],
+  "author": "Gihan S <gihanshp@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gihan10/staticmap-service/issues"
+  },
+  "homepage": "https://github.com/gihan10/staticmap-service#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "fastify": "^3.7.0",
+    "nodemon": "^2.0.6",
+    "staticmaps": "^1.4.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.12.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1"
+  }
+}
