@@ -1,5 +1,7 @@
 ## Static Map Images as a Service
-This project is an alternative to Google Static Map API.
+This project is an alternative to Google Static Map API.  
+
+[![License](https://img.shields.io/github/license/gihan10/staticmap-service)](https://github.com/gihan10/staticmap-service/blob/main/LICENSE)
 
 ## Motivation
 @TODO
