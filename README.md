@@ -6,7 +6,7 @@ This project is an alternative to Google Static Map API.
 
 
 ## Build status
-@TODO
+[![Node.js CI](https://img.shields.io/github/workflow/status/gihan10/staticmap-service/Node.js%20CI?label=Node.js%20CI)](https://github.com/gihan10/staticmap-service/actions?query=workflow%3A%22Node.js+CI%22)
 
 ## Code style
 This project follows `Airbnb` javascript style guide.
