@@ -1,4 +1,4 @@
-const between = require('between-range');
+const { inRange } = require('lodash');
 
 /**
  * Parse size query parameter
@@ -36,13 +36,18 @@ module.exports.parseSize = (size = undefined) => {
   let [width, height] = sizeT.split(separator);
   width = parseInt(width, 10);
   height = parseInt(height, 10);
+
+  const widthMin = parseInt(process.env.IMAGE_WIDTH_MIN, 10);
+  const widthMax = parseInt(process.env.IMAGE_WIDTH_MAX, 10);
   // is image width within valid range?
-  if (!between(width, process.env.IMAGE_WIDTH_MIN, process.env.IMAGE_WIDTH_MAX)) {
-    throw new Error(`Image width should be within ${process.env.IMAGE_WIDTH_MIN}-${process.env.IMAGE_WIDTH_MAX}`);
+  if (!inRange(width, widthMin, widthMax + 1)) {
+    throw new Error(`Image width should be within ${widthMin}-${widthMax}`);
   }
+  const heightMin = parseInt(process.env.IMAGE_HEIGHT_MIN, 10);
+  const heightMax = parseInt(process.env.IMAGE_HEIGHT_MAX, 10);
   // is image height within valid range?
-  if (!between(height, process.env.IMAGE_HEIGHT_MIN, process.env.IMAGE_HEIGHT_MAX)) {
-    throw new Error(`Image height should be within ${process.env.IMAGE_HEIGHT_MIN}-${process.env.IMAGE_HEIGHT_MAX}`);
+  if (!inRange(height, heightMin, heightMax + 1)) {
+    throw new Error(`Image height should be within ${heightMin}-${heightMax}`);
   }
 
   return {
@@ -73,11 +78,11 @@ module.exports.parseGeoCoordinate = (latlon) => {
   const [latitude, longitude] = latlon.trim().split(',');
 
   // is latitude within the range?
-  if (!between(latitude, -90, 90)) {
+  if (!inRange(latitude, -90, 90 + 1)) {
     throw new Error('Latitude should be within -90 and 90');
   }
   // is logitude within the range?
-  if (!between(longitude, -180, 180)) {
+  if (!inRange(longitude, -180, 180 + 1)) {
     throw new Error('Longitude should be within -180 and 180');
   }
 
@@ -100,3 +105,47 @@ module.exports.parseGeoCoordinate = (latlon) => {
  * @author Gihan S <gihanshp@gmail.com>
  */
 module.exports.parseCenter = (center) => this.parseGeoCoordinate(center);
+
+/**
+ * Parse zoom level of the map
+ *
+ * @param {string} level Zoom level as a string
+ *
+ * @returns {number}
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.parseZoom = (level = undefined) => {
+  // is level empty?
+  if (
+    level === undefined
+    || (
+      typeof level === 'string'
+      && level.trim().length === 0
+    )
+  ) {
+    return parseInt(process.env.ZOOM_DEFAULT, 10);
+  }
+
+  // is invalid?
+  if (typeof level !== 'string') {
+    throw new Error('zoom parameter should be string type');
+  }
+
+  if (!/^\d+$/.test(level.trim())) {
+    throw new Error('Invalid zoom value. zoom value should be a integer eg. 10');
+  }
+  const levelValidated = parseInt(level.trim(), 10);
+
+  const zoomMin = parseInt(process.env.ZOOM_MIN, 10);
+  const zoomMax = parseInt(process.env.ZOOM_MAX, 10);
+
+  // is not within the range?
+  if (!inRange(levelValidated, zoomMin, zoomMax + 1)) {
+    throw new Error(`Invalid zoom value. zoom should be within ${zoomMin}-${zoomMax}`);
+  }
+
+  return levelValidated;
+};

@@ -28,6 +28,7 @@
     "between-range": "^1.0.0",
     "dotenv": "^8.2.0",
     "fastify": "^3.7.0",
+    "lodash": "^4.17.20",
     "nodemon": "^2.0.6",
     "staticmaps": "^1.4.2"
   },
