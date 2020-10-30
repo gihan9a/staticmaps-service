@@ -18,19 +18,18 @@ module.exports.parseSize = (size = undefined) => {
   // validate format
   if (
     size === undefined
-    || (
-      typeof size === 'string'
-      && size.trim().length === 0
-    )
+    || (typeof size === 'string' && size.trim().length === 0)
   ) {
     return {
-      width: parseInt(process.env.IMAGE_WIDTH, 10),
-      height: parseInt(process.env.IMAGE_HEIGHT, 10),
+      width: parseInt(process.env.IMAGE_WIDTH_DEFAULT, 10),
+      height: parseInt(process.env.IMAGE_HEIGHT_DEFAULT, 10),
     };
   }
   const sizeT = size.trim();
   if (!/^\d+[xX]\d+$/.test(sizeT)) {
-    throw new Error('Invalid size format. Format should be width x height in integers(without spaces). Eg. 600x400');
+    throw new Error(
+      'Invalid size format. Format should be width x height in integers(without spaces). Eg. 600x400',
+    );
   }
 
   // find the separator
@@ -124,10 +123,7 @@ module.exports.parseZoom = (level = undefined) => {
   // is level empty?
   if (
     level === undefined
-    || (
-      typeof level === 'string'
-      && level.trim().length === 0
-    )
+    || (typeof level === 'string' && level.trim().length === 0)
   ) {
     return parseInt(process.env.ZOOM_DEFAULT, 10);
   }
@@ -138,7 +134,9 @@ module.exports.parseZoom = (level = undefined) => {
   }
 
   if (!/^\d+$/.test(level.trim())) {
-    throw new Error('Invalid zoom value. zoom value should be a integer eg. 10');
+    throw new Error(
+      'Invalid zoom value. zoom value should be a integer eg. 10',
+    );
   }
   const levelValidated = parseInt(level.trim(), 10);
 
@@ -147,7 +145,9 @@ module.exports.parseZoom = (level = undefined) => {
 
   // is not within the range?
   if (!inRange(levelValidated, zoomMin, zoomMax + 1)) {
-    throw new Error(`Invalid zoom value. zoom should be within ${zoomMin}-${zoomMax}`);
+    throw new Error(
+      `Invalid zoom value. zoom should be within ${zoomMin}-${zoomMax}`,
+    );
   }
 
   return levelValidated;
@@ -156,8 +156,9 @@ module.exports.parseZoom = (level = undefined) => {
 /**
  * Generate image name from the map parameters
  *
- * @param {object} size Map image width and height
  * @param {array} center Map center logitude and latitude
+ * @param {string} mimeExt Image MIME extension
+ * @param {object} size Map image width and height
  * @param {number} zoom Map zoom level
  * @param {array} markers Marker objects array
  * @param {array} texts Text marker objects array
@@ -166,14 +167,31 @@ module.exports.parseZoom = (level = undefined) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.getImageName = (size, center, zoom, markers = [], texts = []) => {
-  // build array using all the parameters
-  const data = [
-    ...center,
-    size.width,
-    size.height,
+module.exports.getImageName = ({
+  center,
+  mimeExt,
+  size,
+  zoom,
+  markers = [],
+  texts = [],
+}) => {
+  // validate required options
+  const required = {
+    center,
+    mimeExt,
+    size,
     zoom,
-  ];
+  };
+
+  const keys = Object.keys(required);
+  for (let i = 0; i < keys.length; i += 1) {
+    if (required[keys[i]] === undefined) {
+      throw new Error(`${keys[i]} is required`);
+    }
+  }
+
+  // build array using all the parameters
+  const data = [...center, mimeExt, size.width, size.height, zoom];
   markers.forEach((marker) => {
     data.push(marker.coord[0]);
     data.push(marker.coord[1]);
@@ -221,13 +239,13 @@ module.exports.getImageName = (size, center, zoom, markers = [], texts = []) => 
  * Get cache directory path
  *
  * @param {string} imageName Map image name
- * @param {boolean} create Create cache directory. Default to false
+ * @param {boolean} create Create cache directory. Default to true
  *
  * @returns {string} Cache directory path
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.getCacheDirectory = (imageName, create = false) => {
+module.exports.getCacheDirectory = (imageName, create = true) => {
   // use first 8 chars as sub directories with 2 chars for each sub directory
   const dir1 = imageName.substring(0, 2);
   const dir2 = imageName.substring(2, 4);
@@ -239,4 +257,56 @@ module.exports.getCacheDirectory = (imageName, create = false) => {
     fs.mkdirSync(dir, { recursive: true });
   }
   return dir;
+};
+
+const getImageCachePath = (imageName, basePath, mimeExt = 'jpg') => `${basePath}${path.sep}${imageName}.${mimeExt}`;
+
+const isCached = (imagePath) => fs.existsSync(imagePath);
+
+module.exports.getImageCacheData = ({ mimeExt, ...rest }) => {
+  const baseName = this.getImageName({ ...rest, mimeExt });
+  const basePath = this.getCacheDirectory(baseName);
+  const imagePath = getImageCachePath(baseName, basePath, mimeExt);
+
+  return {
+    path: imagePath,
+    basePath,
+    baseName,
+    isCached: isCached(imagePath),
+  };
+};
+
+const getContentType = (format) => `image/${format}`;
+
+/**
+ * Parse and validate image format.
+ * Valid formats are jpg/png/webp
+ *
+ * @param {string} format Image format
+ *
+ * @returns {object} Returns {contentType, extension}
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.parseFormat = (format = undefined) => {
+  // if not set send default
+  if (!format || (typeof format === 'string' && format.trim() === '')) {
+    return {
+      contentType: getContentType(process.env.IMAGE_FORMAT_DEFAULT),
+      extension: process.env.IMAGE_FORMAT_DEFAULT,
+    };
+  }
+  if (typeof format !== 'string') {
+    throw new Error('format type should be string');
+  }
+
+  const formatLower = format.trim().toLowerCase();
+  const validFormats = ['jpg', 'png', 'webp'];
+  if (!validFormats.includes(formatLower)) {
+    throw new Error('Invalid fomat value. Format should be one of jpg, png, webp');
+  }
+  return {
+    contentType: getContentType(formatLower),
+    extension: formatLower,
+  };
 };

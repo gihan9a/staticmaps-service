@@ -7,6 +7,7 @@ const {
   parseZoom,
   getImageName,
   getCacheDirectory,
+  parseFormat,
 } = require('../../utils');
 
 describe('Test utils.js functions', () => {
@@ -49,12 +50,12 @@ describe('Test utils.js functions', () => {
       expect(parseSize(` ${widthMax}X${heightMax}    `)).toStrictEqual({ width: widthMax, height: heightMax });
       // empty value should use default configured image size
       expect(parseSize('')).toStrictEqual({
-        width: parseInt(process.env.IMAGE_WIDTH, 10),
-        height: parseInt(process.env.IMAGE_HEIGHT, 10),
+        width: parseInt(process.env.IMAGE_WIDTH_DEFAULT, 10),
+        height: parseInt(process.env.IMAGE_HEIGHT_DEFAULT, 10),
       });
       expect(parseSize()).toStrictEqual({
-        width: parseInt(process.env.IMAGE_WIDTH, 10),
-        height: parseInt(process.env.IMAGE_HEIGHT, 10),
+        width: parseInt(process.env.IMAGE_WIDTH_DEFAULT, 10),
+        height: parseInt(process.env.IMAGE_HEIGHT_DEFAULT, 10),
       });
     });
   });
@@ -122,6 +123,7 @@ describe('Test utils.js functions', () => {
   });
 
   const mapParameters1 = {
+    mimeExt: 'jpg',
     center: [13.437524, 52.4945528],
     size: { width: 600, height: 400 },
     zoom: parseZoom(),
@@ -166,6 +168,7 @@ describe('Test utils.js functions', () => {
   };
   // mapParameters2 is same as mapParameters1, just the order of properties are not same
   const mapParameters2 = {
+    mimeExt: 'jpg',
     center: [13.437524, 52.4945528],
     size: { height: 400, width: 600 },
     zoom: parseZoom(),
@@ -212,24 +215,15 @@ describe('Test utils.js functions', () => {
   // getImageName test
   describe('test getImageName function', () => {
     test('test getImageName', () => {
-      const {
-        size: size1, center: center1, zoom: zoom1, markers: markers1, texts: texts1,
-      } = mapParameters1;
-      const {
-        size: size2, center: center2, zoom: zoom2, markers: markers2, texts: texts2,
-      } = mapParameters2;
-      expect(getImageName(size1, center1, zoom1, markers1, texts1))
-        .toBe(getImageName(size2, center2, zoom2, markers2, texts2));
+      expect(getImageName(mapParameters1))
+        .toBe(getImageName(mapParameters2));
     });
   });
 
   // test get cache directory name
   describe('test getCacheDirectory function', () => {
     test('test getCacheDirectory', () => {
-      const {
-        size, center, zoom, markers, texts,
-      } = mapParameters1;
-      const imageName = getImageName(size, center, zoom, markers, texts);
+      const imageName = getImageName(mapParameters1);
 
       const dir = getCacheDirectory(imageName);
 
@@ -243,6 +237,22 @@ describe('Test utils.js functions', () => {
       // create cache directory
       getCacheDirectory(imageName, true);
       expect(fs.existsSync(dir)).toBe(true);
+    });
+  });
+
+  // parseFormat function
+  describe('test parseFormat function', () => {
+    test('test parseFormat with invalid parameters', () => {
+      expect(() => { parseFormat('jpt'); }).toThrow('Invalid fomat value. Format should be one of jpg, png, webp');
+      expect(() => { parseFormat(1); }).toThrow('format type should be string');
+      expect(() => { parseFormat('gif'); }).toThrow('Invalid fomat value. Format should be one of jpg, png, webp');
+    });
+
+    // test with valid
+    test('test parseFormat with valid parameters', () => {
+      expect(parseFormat('jpg')).toStrictEqual({ contentType: 'image/jpg', extension: 'jpg' });
+      expect(parseFormat('png')).toStrictEqual({ contentType: 'image/png', extension: 'png' });
+      expect(parseFormat('webp')).toStrictEqual({ contentType: 'image/webp', extension: 'webp' });
     });
   });
 });
