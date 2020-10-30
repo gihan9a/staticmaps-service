@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const { inRange } = require('lodash');
+const md5 = require('md5');
 
 /**
  * Parse size query parameter
@@ -148,4 +151,90 @@ module.exports.parseZoom = (level = undefined) => {
   }
 
   return levelValidated;
+};
+
+/**
+ * Generate image name from the map parameters
+ *
+ * @param {object} center Map center lat,long
+ * @param {number} zoom Map zoom level
+ * @param {array} markers Marker objects array
+ * @param {array} texts Text marker objects array
+ *
+ * @returns {string} Image name without extension.
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.getImageName = (center, zoom, markers = [], texts = []) => {
+  // build array using all the parameters
+  const data = [
+    center.longitude,
+    center.latitude,
+    zoom,
+  ];
+  markers.forEach((marker) => {
+    data.push(marker.coord[0]);
+    data.push(marker.coord[1]);
+    data.push(marker.img);
+    data.push(marker.height);
+    data.push(marker.width);
+    if (marker.offsetX) {
+      data.push(marker.offsetX);
+    }
+    if (marker.offsetY) {
+      data.push(marker.offsetY);
+    }
+  });
+
+  texts.forEach((text) => {
+    data.push(text.coord[0]);
+    data.push(text.coord[1]);
+    data.push(text.text);
+    if (text.color) {
+      data.push(text.color);
+    }
+    if (text.width) {
+      data.push(text.width);
+    }
+    if (text.fill) {
+      data.push(text.fill);
+    }
+    if (text.size) {
+      data.push(text.size);
+    }
+    if (text.font) {
+      data.push(text.font);
+    }
+    if (text.anchor) {
+      data.push(text.anchor);
+    }
+  });
+
+  // sort the data
+  data.sort();
+  return md5(data);
+};
+
+/**
+ * Get cache directory path
+ *
+ * @param {string} imageName Map image name
+ * @param {boolean} create Create cache directory. Default to false
+ *
+ * @returns {string} Cache directory path
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.getCacheDirectory = (imageName, create = false) => {
+  // use first 8 chars as sub directories with 2 chars for each sub directory
+  const dir1 = imageName.substring(0, 2);
+  const dir2 = imageName.substring(2, 4);
+  const dir3 = imageName.substring(4, 6);
+  const dir4 = imageName.substring(6, 8);
+
+  const dir = `${process.env.CACHE_DIRECTORY}${path.sep}${dir1}${path.sep}${dir2}${path.sep}${dir3}${path.sep}${dir4}`;
+  if (create) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return dir;
 };

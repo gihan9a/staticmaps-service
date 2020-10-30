@@ -1,9 +1,12 @@
+const fs = require('fs');
 const { random } = require('lodash');
 const {
   parseSize,
   parseGeoCoordinate,
   parseCenter,
   parseZoom,
+  getImageName,
+  getCacheDirectory,
 } = require('../../utils');
 
 describe('Test utils.js functions', () => {
@@ -115,6 +118,129 @@ describe('Test utils.js functions', () => {
       expect(parseZoom('')).toBe(parseInt(ZOOM_DEFAULT, 10));
       expect(parseZoom(' ')).toBe(parseInt(ZOOM_DEFAULT, 10));
       expect(parseZoom(`${zoomValid}`)).toBe(zoomValid);
+    });
+  });
+
+  const mapParameters1 = {
+    center: [13.437524, 52.4945528],
+    zoom: parseZoom(),
+    markers: [
+      {
+        img: 'http://exmple.com/marker.png', // can also be a URL
+        offsetX: 24,
+        offsetY: 48,
+        width: 48,
+        height: 48,
+        coord: [13.437524, 52.4945528],
+      },
+      {
+        img: 'http://exmple.com/marker.png', // can also be a URL
+        offsetX: 24,
+        offsetY: 48,
+        width: 48,
+        height: 48,
+        coord: [13.430524, 52.4995528],
+      },
+    ],
+    texts: [
+      {
+        coord: [13.437524, 52.4945528],
+        text: 'My Text',
+        size: 50,
+        width: '1px',
+        fill: '#000000',
+        color: '#ffffff',
+        font: 'Calibri',
+      },
+      {
+        coord: [13.430524, 52.4995528],
+        text: 'My Text 2',
+        size: 50,
+        width: '1px',
+        fill: '#000000',
+        color: '#ffffff',
+        font: 'Calibri',
+      },
+    ],
+  };
+  // mapParameters2 is same as mapParameters1, just the order of properties are not same
+  const mapParameters2 = {
+    center: [13.437524, 52.4945528],
+    zoom: parseZoom(),
+    markers: [
+      {
+        coord: [13.430524, 52.4995528],
+        offsetX: 24,
+        img: 'http://exmple.com/marker.png', // can also be a URL
+        width: 48,
+        height: 48,
+        offsetY: 48,
+      },
+      {
+        img: 'http://exmple.com/marker.png', // can also be a URL
+        offsetY: 48,
+        offsetX: 24,
+        coord: [13.437524, 52.4945528],
+        height: 48,
+        width: 48,
+      },
+    ],
+    texts: [
+      {
+        font: 'Calibri',
+        text: 'My Text',
+        size: 50,
+        coord: [13.437524, 52.4945528],
+        fill: '#000000',
+        width: '1px',
+        color: '#ffffff',
+      },
+      {
+        size: 50,
+        coord: [13.430524, 52.4995528],
+        color: '#ffffff',
+        text: 'My Text 2',
+        width: '1px',
+        fill: '#000000',
+        font: 'Calibri',
+      },
+    ],
+  };
+
+  // getImageName test
+  describe('test getImageName function', () => {
+    test('test getImageName', () => {
+      const {
+        center: center1, zoom: zoom1, markers: markers1, texts: texts1,
+      } = mapParameters1;
+      const {
+        center: center2, zoom: zoom2, markers: markers2, texts: texts2,
+      } = mapParameters2;
+      expect(getImageName(center1, zoom1, markers1, texts1))
+        .toBe(getImageName(center2, zoom2, markers2, texts2));
+    });
+  });
+
+  // test get cache directory name
+  describe('test getCacheDirectory function', () => {
+    test('test getCacheDirectory', () => {
+      const {
+        center, zoom, markers, texts,
+      } = mapParameters1;
+      const imageName = getImageName(center, zoom, markers, texts);
+
+      const dir = getCacheDirectory(imageName);
+
+      // delete if directory already exists
+      if (fs.existsSync(dir)) {
+        // delete directory
+        fs.rmdirSync(dir, { recursive: true });
+        expect(fs.existsSync(dir)).toBe(false);
+      }
+
+      // create cache directory
+      getCacheDirectory(imageName, true);
+      expect(fs.existsSync(dir)).toBe(true);
     });
   });
 });
