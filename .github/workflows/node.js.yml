@@ -36,3 +36,5 @@ jobs:
           ZOOM_MIN: ${{secrets.ZOOM_MIN}}
           ZOOM_MAX: ${{secrets.ZOOM_MAX}}
           ZOOM_DEFAULT: ${{secrets.ZOOM_DEFAULT}}
+          IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
+          CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
