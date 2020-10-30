@@ -59,6 +59,7 @@ fastify.get('/', async (request, reply) => {
     return buffer;
   } catch (err) {
     // logo error
+    // eslint-disable-next-line no-console
     console.error(err);
 
     // respond error
