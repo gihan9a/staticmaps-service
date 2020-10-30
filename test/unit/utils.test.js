@@ -123,6 +123,7 @@ describe('Test utils.js functions', () => {
 
   const mapParameters1 = {
     center: [13.437524, 52.4945528],
+    size: { width: 600, height: 400 },
     zoom: parseZoom(),
     markers: [
       {
@@ -166,6 +167,7 @@ describe('Test utils.js functions', () => {
   // mapParameters2 is same as mapParameters1, just the order of properties are not same
   const mapParameters2 = {
     center: [13.437524, 52.4945528],
+    size: { height: 400, width: 600 },
     zoom: parseZoom(),
     markers: [
       {
@@ -211,13 +213,13 @@ describe('Test utils.js functions', () => {
   describe('test getImageName function', () => {
     test('test getImageName', () => {
       const {
-        center: center1, zoom: zoom1, markers: markers1, texts: texts1,
+        size: size1, center: center1, zoom: zoom1, markers: markers1, texts: texts1,
       } = mapParameters1;
       const {
-        center: center2, zoom: zoom2, markers: markers2, texts: texts2,
+        size: size2, center: center2, zoom: zoom2, markers: markers2, texts: texts2,
       } = mapParameters2;
-      expect(getImageName(center1, zoom1, markers1, texts1))
-        .toBe(getImageName(center2, zoom2, markers2, texts2));
+      expect(getImageName(size1, center1, zoom1, markers1, texts1))
+        .toBe(getImageName(size2, center2, zoom2, markers2, texts2));
     });
   });
 
@@ -225,9 +227,9 @@ describe('Test utils.js functions', () => {
   describe('test getCacheDirectory function', () => {
     test('test getCacheDirectory', () => {
       const {
-        center, zoom, markers, texts,
+        size, center, zoom, markers, texts,
       } = mapParameters1;
-      const imageName = getImageName(center, zoom, markers, texts);
+      const imageName = getImageName(size, center, zoom, markers, texts);
 
       const dir = getCacheDirectory(imageName);
 

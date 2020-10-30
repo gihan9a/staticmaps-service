@@ -156,7 +156,8 @@ module.exports.parseZoom = (level = undefined) => {
 /**
  * Generate image name from the map parameters
  *
- * @param {object} center Map center lat,long
+ * @param {object} size Map image width and height
+ * @param {array} center Map center logitude and latitude
  * @param {number} zoom Map zoom level
  * @param {array} markers Marker objects array
  * @param {array} texts Text marker objects array
@@ -165,11 +166,12 @@ module.exports.parseZoom = (level = undefined) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.getImageName = (center, zoom, markers = [], texts = []) => {
+module.exports.getImageName = (size, center, zoom, markers = [], texts = []) => {
   // build array using all the parameters
   const data = [
-    center.longitude,
-    center.latitude,
+    ...center,
+    size.width,
+    size.height,
     zoom,
   ];
   markers.forEach((marker) => {
