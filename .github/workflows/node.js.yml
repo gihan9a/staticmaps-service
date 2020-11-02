@@ -12,7 +12,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      IMAGE_WIDTH_DEFAULT: ${{secrets.IMAGE_WIDTH_DEFAULT}}
+      IMAGE_WIDTH_MIN: ${{secrets.IMAGE_WIDTH_MIN}}
+      IMAGE_WIDTH_MAX: ${{secrets.IMAGE_WIDTH_MAX}}
+      IMAGE_HEIGHT_DEFAULT: ${{secrets.IMAGE_HEIGHT_DEFAULT}}
+      IMAGE_HEIGHT_MIN: ${{secrets.IMAGE_HEIGHT_MIN}}
+      IMAGE_HEIGHT_MAX: ${{secrets.IMAGE_HEIGHT_MAX}}
+      ZOOM_MIN: ${{secrets.ZOOM_MIN}}
+      ZOOM_MAX: ${{secrets.ZOOM_MAX}}
+      ZOOM_DEFAULT: ${{secrets.ZOOM_DEFAULT}}
+      IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
+      CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
+      CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
@@ -25,16 +37,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm run build --if-present
-      - run: npm test
-        env:
-          IMAGE_WIDTH_DEFAULT: ${{secrets.IMAGE_WIDTH_DEFAULT}}
-          IMAGE_WIDTH_MIN: ${{secrets.IMAGE_WIDTH_MIN}}
-          IMAGE_WIDTH_MAX: ${{secrets.IMAGE_WIDTH_MAX}}
-          IMAGE_HEIGHT_DEFAULT: ${{secrets.IMAGE_HEIGHT_DEFAULT}}
-          IMAGE_HEIGHT_MIN: ${{secrets.IMAGE_HEIGHT_MIN}}
-          IMAGE_HEIGHT_MAX: ${{secrets.IMAGE_HEIGHT_MAX}}
-          ZOOM_MIN: ${{secrets.ZOOM_MIN}}
-          ZOOM_MAX: ${{secrets.ZOOM_MAX}}
-          ZOOM_DEFAULT: ${{secrets.ZOOM_DEFAULT}}
-          IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
-          CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
+      - run: npm run test:cover
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report
