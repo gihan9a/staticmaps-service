@@ -178,7 +178,7 @@ describe('Test utils.js functions', () => {
     test('test parseZoom existance', () => {
       expect(typeof parseZoom === 'function').toBe(true);
     });
-    const { ZOOM_MIN, ZOOM_MAX, ZOOM_DEFAULT } = process.env;
+    const { ZOOM_MIN, ZOOM_MAX } = process.env;
     const zoomMin = parseInt(ZOOM_MIN, 10);
     const zoomMax = parseInt(ZOOM_MAX, 10);
     const zoomValid = random(zoomMin, zoomMax);
@@ -187,6 +187,15 @@ describe('Test utils.js functions', () => {
       expect(() => {
         parseZoom(zoomValid);
       }).toThrow('zoom parameter should be string type');
+      expect(() => {
+        parseZoom();
+      }).toThrow('zoom parameter should be string type');
+      expect(() => {
+        parseZoom('');
+      }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
+      expect(() => {
+        parseZoom(' ');
+      }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
       expect(() => {
         parseZoom('abc');
       }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
@@ -207,9 +216,6 @@ describe('Test utils.js functions', () => {
       }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
     });
     test('test parseZoom with valid parameters', () => {
-      expect(parseZoom()).toBe(parseInt(ZOOM_DEFAULT, 10));
-      expect(parseZoom('')).toBe(parseInt(ZOOM_DEFAULT, 10));
-      expect(parseZoom(' ')).toBe(parseInt(ZOOM_DEFAULT, 10));
       expect(parseZoom(`${zoomValid}`)).toBe(zoomValid);
     });
   });

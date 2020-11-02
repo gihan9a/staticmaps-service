@@ -117,14 +117,6 @@ module.exports.parseCenter = (center) => this.parseGeoCoordinate(center);
  * @author Gihan S <gihanshp@gmail.com>
  */
 module.exports.parseZoom = (level = undefined) => {
-  // is level empty?
-  if (
-    level === undefined
-    || (typeof level === 'string' && level.trim().length === 0)
-  ) {
-    return parseInt(process.env.ZOOM_DEFAULT, 10);
-  }
-
   // is invalid?
   if (typeof level !== 'string') {
     throw new Error('zoom parameter should be string type');
