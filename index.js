@@ -73,6 +73,6 @@ fastify.get('/', async (request, reply) => {
   }
 });
 
-fastify.listen(process.env.PORT, (err) => {
+fastify.listen(process.env.PORT, '0.0.0.0', (err) => {
   if (err) throw err;
 });
