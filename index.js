@@ -4,6 +4,8 @@ const fs = require('fs');
 const fastify = require('fastify')({
   logger: true,
 });
+fastify.register(require('fastify-favicon'));
+
 const StaticMaps = require('staticmaps');
 
 const {

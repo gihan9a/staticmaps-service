@@ -1,4 +1,6 @@
 ## Static Map Images as a Service
+![Logo](./assets/logo-96.png)  
+
 This project is an alternative to Google Static Map API.  
 
 [![License](https://img.shields.io/github/license/gihan10/staticmap-service)](https://github.com/gihan10/staticmap-service/blob/main/LICENSE)
@@ -47,6 +49,8 @@ Contributions are welcome to the project. Please kindly go through the [contribu
 
 ## Credits
 @TODO
+
+[Pittsburgh Map icon](https://icons8.com/icons/set/pittsburgh-map) by [Icons8](https://icons8.com)
 
 #### Anything else that seems useful
 
