@@ -88,10 +88,7 @@ module.exports.parseGeoCoordinate = (latlon) => {
     throw new Error('Longitude should be within -180 and 180');
   }
 
-  return {
-    latitude: parseFloat(latitude),
-    longitude: parseFloat(longitude),
-  };
+  return [parseFloat(longitude), parseFloat(latitude)];
 };
 
 /**
@@ -154,9 +151,45 @@ module.exports.parseZoom = (level = undefined) => {
 };
 
 /**
+ * Serialize markers
+ *
+ * @param {array} markers Map markers configurations
+ *
+ * @returns {string} serialize string
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const serializeMarkers = (markers = []) => markers
+  .map(
+    ({
+      coord, img, height, width, offsetX, offsetY,
+    }) => `coord:${coord},img:${img},height:${height},width:${width},offsetX:${offsetX},offsetY:${offsetY}`,
+  )
+  .sort()
+  .reduce((acc, curr) => `${acc}${curr}`, '');
+
+/**
+ * Serialize texts
+ *
+ * @param {array} texts Texts array
+ *
+ * @returns {string} serialize string
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const serializeTexts = (texts = []) => texts
+  .map(
+    ({
+      coord, text, color, width, fill, size, font, anchor,
+    }) => `coord:${coord},text:${text},color:${color},width:${width},fill:${fill},size:${size},font:${font},anchor:${anchor}`,
+  )
+  .sort()
+  .reduce((acc, curr) => `${acc}${curr}`, '');
+
+/**
  * Generate image name from the map parameters
  *
- * @param {array} center Map center logitude and latitude
+ * @param {array} center Map center [logitude,latitude]
  * @param {string} mimeExt Image MIME extension
  * @param {object} size Map image width and height
  * @param {number} zoom Map zoom level
@@ -167,8 +200,8 @@ module.exports.parseZoom = (level = undefined) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.getImageName = ({
-  center,
+const getImageName = ({
+  center = [],
   mimeExt,
   size,
   zoom,
@@ -177,10 +210,8 @@ module.exports.getImageName = ({
 }) => {
   // validate required options
   const required = {
-    center,
     mimeExt,
     size,
-    zoom,
   };
 
   const keys = Object.keys(required);
@@ -190,48 +221,17 @@ module.exports.getImageName = ({
     }
   }
 
+  if (center.length === 0 && markers.length === 0 && texts.length === 0) {
+    throw new Error('At least center, markers or texts parameter is required');
+  }
+
   // build array using all the parameters
-  const data = [...center, mimeExt, size.width, size.height, zoom];
-  markers.forEach((marker) => {
-    data.push(marker.coord[0]);
-    data.push(marker.coord[1]);
-    data.push(marker.img);
-    data.push(marker.height);
-    data.push(marker.width);
-    if (marker.offsetX) {
-      data.push(marker.offsetX);
-    }
-    if (marker.offsetY) {
-      data.push(marker.offsetY);
-    }
-  });
+  const data = `mimeExt:${mimeExt};size:${size.width},${
+    size.height
+  };zoom:${zoom};markers:${serializeMarkers(markers)};texts:${serializeTexts(
+    texts,
+  )}`;
 
-  texts.forEach((text) => {
-    data.push(text.coord[0]);
-    data.push(text.coord[1]);
-    data.push(text.text);
-    if (text.color) {
-      data.push(text.color);
-    }
-    if (text.width) {
-      data.push(text.width);
-    }
-    if (text.fill) {
-      data.push(text.fill);
-    }
-    if (text.size) {
-      data.push(text.size);
-    }
-    if (text.font) {
-      data.push(text.font);
-    }
-    if (text.anchor) {
-      data.push(text.anchor);
-    }
-  });
-
-  // sort the data
-  data.sort();
   return md5(data);
 };
 
@@ -245,7 +245,7 @@ module.exports.getImageName = ({
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.getCacheDirectory = (imageName, create = true) => {
+const getCacheDirectory = (imageName, create = true) => {
   // use first 8 chars as sub directories with 2 chars for each sub directory
   const dir1 = imageName.substring(0, 2);
   const dir2 = imageName.substring(2, 4);
@@ -264,8 +264,8 @@ const getImageCachePath = (imageName, basePath, mimeExt = 'jpg') => `${basePath}
 const isCached = (imagePath) => fs.existsSync(imagePath);
 
 module.exports.getImageCacheData = ({ mimeExt, ...rest }) => {
-  const baseName = this.getImageName({ ...rest, mimeExt });
-  const basePath = this.getCacheDirectory(baseName);
+  const baseName = getImageName({ ...rest, mimeExt });
+  const basePath = getCacheDirectory(baseName);
   const imagePath = getImageCachePath(baseName, basePath, mimeExt);
 
   return {
@@ -417,8 +417,7 @@ const parseMarkerConfigs = (configs = []) => {
  */
 const validateMarkerLocations = (locations) => locations.map((location) => {
   try {
-    const { latitude, longitude } = this.parseGeoCoordinate(location);
-    return [longitude, latitude];
+    return this.parseGeoCoordinate(location);
   } catch (err) {
     if (/^Invalid geo coordinate format/.test(err.message)) {
       throw new Error(

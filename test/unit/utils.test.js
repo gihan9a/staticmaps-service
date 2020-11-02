@@ -6,8 +6,7 @@ const {
   parseGeoCoordinate,
   parseCenter,
   parseZoom,
-  getImageName,
-  getCacheDirectory,
+  getImageCacheData,
   parseFormat,
   parseMarkers,
 } = require('../../utils');
@@ -157,14 +156,14 @@ describe('Test utils.js functions', () => {
       }).toThrow('Longitude should be within -180 and 180');
     });
     test('test parseGeoCoordinate with valid parameters', () => {
-      expect(parseGeoCoordinate('-12.445,78.12484')).toStrictEqual({
-        latitude: -12.445,
-        longitude: 78.12484,
-      });
-      expect(parseGeoCoordinate('-12.445,-78.12484')).toStrictEqual({
-        latitude: -12.445,
-        longitude: -78.12484,
-      });
+      expect(parseGeoCoordinate('-12.445,78.12484')).toStrictEqual([
+        78.12484,
+        -12.445,
+      ]);
+      expect(parseGeoCoordinate('-12.445,-78.12484')).toStrictEqual([
+        -78.12484,
+        -12.445,
+      ]);
     });
   });
   // parseCenter
@@ -219,7 +218,7 @@ describe('Test utils.js functions', () => {
     mimeExt: 'jpg',
     center: [13.437524, 52.4945528],
     size: { width: 600, height: 400 },
-    zoom: parseZoom(),
+    zoom: 10,
     markers: [
       {
         img: 'http://exmple.com/marker.png', // can also be a URL
@@ -264,7 +263,7 @@ describe('Test utils.js functions', () => {
     mimeExt: 'jpg',
     center: [13.437524, 52.4945528],
     size: { height: 400, width: 600 },
-    zoom: parseZoom(),
+    zoom: 10,
     markers: [
       {
         coord: [13.430524, 52.4995528],
@@ -306,29 +305,22 @@ describe('Test utils.js functions', () => {
   };
 
   // getImageName test
-  describe('test getImageName function', () => {
+  describe('test getImageCacheData function', () => {
     test('test getImageName', () => {
-      expect(getImageName(mapParameters1)).toBe(getImageName(mapParameters2));
+      expect(getImageCacheData(mapParameters1)).toStrictEqual(
+        getImageCacheData(mapParameters2),
+      );
     });
-  });
-
-  // test get cache directory name
-  describe('test getCacheDirectory function', () => {
     test('test getCacheDirectory', () => {
-      const imageName = getImageName(mapParameters1);
-
-      const dir = getCacheDirectory(imageName);
-
-      // delete if directory already exists
-      if (fs.existsSync(dir)) {
-        // delete directory
-        fs.rmdirSync(dir, { recursive: true });
-        expect(fs.existsSync(dir)).toBe(false);
-      }
+      const { basePath } = getImageCacheData(mapParameters1);
+      expect(fs.existsSync(basePath)).toBe(true);
+      // delete directory
+      fs.rmdirSync(basePath, { recursive: true });
+      expect(fs.existsSync(basePath)).toBe(false);
 
       // create cache directory
-      getCacheDirectory(imageName, true);
-      expect(fs.existsSync(dir)).toBe(true);
+      const { basePath: basePath1 } = getImageCacheData(mapParameters1);
+      expect(fs.existsSync(basePath1)).toBe(true);
     });
   });
 
@@ -385,8 +377,12 @@ describe('Test utils.js functions', () => {
         parseMarkers('62.107733|-145.541936');
       }).toThrow('No marker locations found');
       expect(() => {
-        parseMarkers('62.107733,-145.541936|62.107733,-146.54193662.107733,-147.541936|62.107733,-148.541936');
-      }).toThrow('Invalid marker location found "62.107733,-146.54193662.107733,-147.541936". Eg. -12.445,78.12484');
+        parseMarkers(
+          '62.107733,-145.541936|62.107733,-146.54193662.107733,-147.541936|62.107733,-148.541936',
+        );
+      }).toThrow(
+        'Invalid marker location found "62.107733,-146.54193662.107733,-147.541936". Eg. -12.445,78.12484',
+      );
       expect(() => {
         parseMarkers('-145.541936');
       }).toThrow('No marker locations found');
@@ -412,7 +408,9 @@ describe('Test utils.js functions', () => {
       // marker configurations
       expect(() => {
         parseMarkers('style:none62.107733,-145.541936');
-      }).toThrow('Invalid marker location found "style:none62.107733,-145.541936". Eg. -12.445,78.12484');
+      }).toThrow(
+        'Invalid marker location found "style:none62.107733,-145.541936". Eg. -12.445,78.12484',
+      );
       expect(() => {
         parseMarkers('style:none|62.107733,-145.541936');
       }).toThrow('Invalid marker configuration "style:none"');
