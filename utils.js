@@ -288,16 +288,17 @@ const getContentType = (format) => `image/${format}`;
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.parseFormat = (format = undefined) => {
+module.exports.parseFormat = (format = '') => {
+  if (typeof format !== 'string') {
+    throw new Error('format type should be string');
+  }
+
   // if not set send default
-  if (!format || (typeof format === 'string' && format.trim() === '')) {
+  if (format.trim() === '') {
     return {
       contentType: getContentType(process.env.IMAGE_FORMAT_DEFAULT),
       extension: process.env.IMAGE_FORMAT_DEFAULT,
     };
-  }
-  if (typeof format !== 'string') {
-    throw new Error('format type should be string');
   }
 
   const formatLower = format.trim().toLowerCase();
