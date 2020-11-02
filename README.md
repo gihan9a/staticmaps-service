@@ -4,13 +4,16 @@
 This project is an alternative to Google Static Map API.  
 
 [![License](https://img.shields.io/github/license/gihan10/staticmap-service)](https://github.com/gihan10/staticmap-service/blob/main/LICENSE)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1a4d865272044212860e5c1b1a090c26)](https://app.codacy.com/gh/gihan10/staticmap-service?utm_source=github.com&utm_medium=referral&utm_content=gihan10/staticmap-service&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/f4ea491b97724199a871de00ea437563)](https://www.codacy.com/gh/gihan10/staticmap-service/dashboard?utm_source=github.com&utm_medium=referral&utm_content=gihan10/staticmap-service&utm_campaign=Badge_Coverage)
+
 
 ## Motivation
 @TODO
 
 
 ## Build status
-[![Node.js CI](https://img.shields.io/github/workflow/status/gihan10/staticmap-service/Node.js%20CI?label=Node.js%20CI)](https://github.com/gihan10/staticmap-service/actions?query=workflow%3A%22Node.js+CI%22) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1a4d865272044212860e5c1b1a090c26)](https://app.codacy.com/gh/gihan10/staticmap-service?utm_source=github.com&utm_medium=referral&utm_content=gihan10/staticmap-service&utm_campaign=Badge_Grade)
+[![Node.js CI](https://img.shields.io/github/workflow/status/gihan10/staticmap-service/Node.js%20CI?label=Node.js%20CI)](https://github.com/gihan10/staticmap-service/actions?query=workflow%3A%22Node.js+CI%22)
 
 ## Code style
 This project follows `Airbnb` javascript style guide.
