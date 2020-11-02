@@ -303,7 +303,9 @@ module.exports.parseFormat = (format = undefined) => {
   const formatLower = format.trim().toLowerCase();
   const validFormats = ['jpg', 'png', 'webp'];
   if (!validFormats.includes(formatLower)) {
-    throw new Error('Invalid fomat value. Format should be one of jpg, png, webp');
+    throw new Error(
+      'Invalid fomat value. Format should be one of jpg, png, webp',
+    );
   }
   return {
     contentType: getContentType(formatLower),
