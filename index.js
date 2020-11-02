@@ -14,31 +14,35 @@ const {
   parseZoom,
   getImageCacheData,
   parseFormat,
+  parseMarkers,
 } = require('./utils');
 
 fastify.get('/', async (request, reply) => {
   try {
     // is center query not provided?
-    if (request.query.center === undefined) {
-      throw new Error('center parameter is required.');
+    if (
+      request.query.center === undefined
+      && request.query.markers === undefined
+      && request.query.texts === undefined
+    ) {
+      throw new Error('At least center, markers or texts parameter is required');
     }
     // parse and validate query parameters
-    const center = parseCenter(request.query.center);
+    let center = [];
+    if (request.query.center) {
+      center = parseCenter(request.query.center);
+    }
     const { width, height } = parseSize(request.query.size);
-    const zoom = parseZoom(request.query.zoom);
+    const zoom = request.query.zoom && parseZoom(request.query.zoom);
     const { contentType, extension } = parseFormat(request.query.format);
-
-    // create new StaticMap instance
-    const map = new StaticMaps({
-      width,
-      height,
-    });
+    const markers = parseMarkers(request.query.markers);
 
     const { isCached, path: imagePath } = getImageCacheData({
-      center: [center.longitude, center.latitude],
+      center,
       size: { width, height },
       mimeExt: extension,
       zoom,
+      markers,
     });
 
     // is there a cached copy?
@@ -49,9 +53,21 @@ fastify.get('/', async (request, reply) => {
       return fs.readFileSync(imagePath);
     }
 
+    // create new StaticMap instance
+    const map = new StaticMaps({
+      width,
+      height,
+    });
+
+    // markers?
+    if (markers.length > 0) {
+      markers.forEach((marker) => {
+        map.addMarker(marker);
+      });
+    }
     // render new image
     const buffer = await map
-      .render([center.longitude, center.latitude], zoom)
+      .render(center.length > 0 ? center : undefined, zoom)
       .then(() => {
         map.image.save(imagePath);
         return map.image.buffer(contentType);
@@ -65,7 +81,7 @@ fastify.get('/', async (request, reply) => {
     console.error(err);
 
     // respond error
-    reply.type('application/json').code(200);
+    reply.type('application/json').code(400);
     return {
       data: 'error',
       error: err.message,
