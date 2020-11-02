@@ -310,3 +310,164 @@ module.exports.parseFormat = (format = undefined) => {
     extension: formatLower,
   };
 };
+
+/**
+ * Get marker icon path
+ *
+ * @param {string} value Marker color
+ *
+ * @returns {array} returns Marker icon key and value for marker configuration
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const getMarkerIcon = (value) => {
+  // is valid color option
+  if (
+    ![
+      'black',
+      'blue',
+      'green',
+      'orange',
+      'purple',
+      'red',
+      'white',
+      'yellow',
+    ].includes(value)
+  ) {
+    throw new Error(`Invalid marker color "${value}"`);
+  }
+
+  // get the marker color image
+  return ['img', path.resolve(__dirname, `./assets/markers/${value}-32.png`)];
+};
+
+/**
+ * Validate configuration
+ *
+ * @param {array} Configuration as array
+ *
+ * @returns {array} Configuration key and value as array
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidMarkerConfig = ([key, value]) => {
+  // basic validate of key and value
+  if (!key || !value) {
+    throw new Error(`Invalid marker configuration "${key}:${value}"`);
+  }
+
+  switch (key) {
+    case 'color':
+      return getMarkerIcon(value);
+    default:
+      throw new Error(`Invalid marker configuration "${key}:${value}"`);
+  }
+};
+
+/**
+ * Parse and validate marker configurations
+ *
+ * @param {array} configs Configs to parse
+ *
+ * @returns {object} marker configurations
+ *
+ * @throws Error if configurations fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const parseMarkerConfigs = (configs = []) => {
+  const data = {};
+  if (configs.length > 0) {
+    configs.forEach((config) => {
+      const [key, value] = isValidMarkerConfig(config.split(':'));
+      data[key] = value;
+    });
+  }
+
+  // set default configurations if not present
+  const imgDefault = path.resolve(
+    __dirname,
+    `./assets/markers/${process.env.MARKER_COLOR_DEFAULT}-32.png`,
+  );
+  return {
+    width: 32,
+    height: 32,
+    img: imgDefault,
+    ...data,
+  };
+};
+
+/**
+ * Validate marker locations
+ *
+ * @param {array} locations Marker locations
+ *
+ * @returns {array} Marker locations
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const validateMarkerLocations = (locations) => locations.map((location) => {
+  try {
+    const { latitude, longitude } = this.parseGeoCoordinate(location);
+    return [longitude, latitude];
+  } catch (err) {
+    if (/^Invalid geo coordinate format/.test(err.message)) {
+      throw new Error(
+        `Invalid marker location found "${location}". Eg. -12.445,78.12484`,
+      );
+    }
+    throw new Error(
+      `Invalid marker location found "${location}". ${err.message}`,
+    );
+  }
+});
+
+/**
+ * Parse markers query string
+ *
+ * @param {string} markers Markers query string
+ *
+ * @returns {array} array of markers
+ *
+ * @throws Error if markers are invalid
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.parseMarkers = (markers = '') => {
+  // is not string?
+  if (typeof markers !== 'string') {
+    throw new Error('Markers should be string type');
+  }
+
+  // is empty?
+  if (markers.trim() === '') {
+    return [];
+  }
+
+  // split by |
+  const options = markers.trim().split('|');
+  const locations = options.filter((marker) => /,/.test(marker));
+  if (locations.length === 0) {
+    throw new Error('No marker locations found');
+  }
+
+  // validate geo locations
+  const parsedLocations = validateMarkerLocations(locations);
+
+  // parse marker configurations
+  const configs = parseMarkerConfigs(
+    options.filter((marker) => /:/.test(marker)),
+  );
+
+  // build final marker configurations
+  return parsedLocations.map((location) => ({
+    coord: location,
+    ...configs,
+  }));
+};

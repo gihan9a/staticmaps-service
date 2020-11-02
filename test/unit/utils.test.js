@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { random } = require('lodash');
 const {
   parseSize,
@@ -8,6 +9,7 @@ const {
   getImageName,
   getCacheDirectory,
   parseFormat,
+  parseMarkers,
 } = require('../../utils');
 
 describe('Test utils.js functions', () => {
@@ -253,6 +255,88 @@ describe('Test utils.js functions', () => {
       expect(parseFormat('jpg')).toStrictEqual({ contentType: 'image/jpg', extension: 'jpg' });
       expect(parseFormat('png')).toStrictEqual({ contentType: 'image/png', extension: 'png' });
       expect(parseFormat('webp')).toStrictEqual({ contentType: 'image/webp', extension: 'webp' });
+  // test parseMarkers function
+  describe('test parseMarkers function', () => {
+    test('test markersFunction with invalid parameters', () => {
+      expect(() => {
+        parseMarkers(null);
+      }).toThrow('Markers should be string type');
+      expect(() => {
+        parseMarkers(1);
+      }).toThrow('Markers should be string type');
+      expect(() => {
+        parseMarkers('|');
+      }).toThrow('No marker locations found');
+      expect(() => {
+        parseMarkers('||');
+      }).toThrow('No marker locations found');
+      expect(() => {
+        parseMarkers('|, |');
+      }).toThrow('Invalid marker location found ", ". Eg. -12.445,78.12484');
+      expect(() => {
+        parseMarkers('62.107733|-145.541936');
+      }).toThrow('No marker locations found');
+      expect(() => {
+        parseMarkers('62.107733,-145.541936|62.107733,-146.54193662.107733,-147.541936|62.107733,-148.541936');
+      }).toThrow('Invalid marker location found "62.107733,-146.54193662.107733,-147.541936". Eg. -12.445,78.12484');
+      expect(() => {
+        parseMarkers('-145.541936');
+      }).toThrow('No marker locations found');
+      expect(() => {
+        parseMarkers('color:red');
+      }).toThrow('No marker locations found');
+      expect(() => {
+        parseMarkers('62.107733,-195.541936');
+      }).toThrow(
+        'Invalid marker location found "62.107733,-195.541936". Longitude should be within -180 and 180',
+      );
+      expect(() => {
+        parseMarkers('62.107733,-145.541936|92.107733,-145.541936');
+      }).toThrow(
+        'Invalid marker location found "92.107733,-145.541936". Latitude should be within -90 and 90',
+      );
+      expect(() => {
+        parseMarkers('||62.107733,-145.541936|92.107733,-145.541936');
+      }).toThrow(
+        'Invalid marker location found "92.107733,-145.541936". Latitude should be within -90 and 90',
+      );
+
+      // marker configurations
+      expect(() => {
+        parseMarkers('style:none62.107733,-145.541936');
+      }).toThrow('Invalid marker location found "style:none62.107733,-145.541936". Eg. -12.445,78.12484');
+      expect(() => {
+        parseMarkers('style:none|62.107733,-145.541936');
+      }).toThrow('Invalid marker configuration "style:none"');
+      expect(() => {
+        parseMarkers('color:|62.107733,-145.541936');
+      }).toThrow('Invalid marker configuration "color:"');
+      expect(() => {
+        parseMarkers('color:none|62.107733,-145.541936');
+      }).toThrow('Invalid marker color "none"');
+    });
+    test('test markersFunction with valid parameters', () => {
+      expect(parseMarkers(undefined)).toStrictEqual([]);
+      const markerColorDefault = process.env.MARKER_COLOR_DEFAULT;
+      expect(parseMarkers('62.107733,-145.541936')).toStrictEqual([
+        {
+          coord: [-145.541936, 62.107733],
+          img: path.resolve(
+            __dirname,
+            `../../assets/markers/${markerColorDefault}-32.png`,
+          ),
+          height: 32,
+          width: 32,
+        },
+      ]);
+      expect(parseMarkers('color:red|62.107733,-145.541936')).toStrictEqual([
+        {
+          coord: [-145.541936, 62.107733],
+          img: path.resolve(__dirname, '../../assets/markers/red-32.png'),
+          height: 32,
+          width: 32,
+        },
+      ]);
     });
   });
 });
