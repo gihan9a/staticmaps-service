@@ -42,7 +42,7 @@ This project follows `Airbnb` javascript style guide.
 @TODO
 
 ## How to use?
-Please refer the [Wiki](./wiki)
+Please refer the [Wiki](https://github.com/gihan10/staticmap-service/wiki) page for detailed use of the API.
 
 ## Contribute
 
