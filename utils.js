@@ -596,7 +596,7 @@ module.exports.parsePath = (line = '') => {
 
   // is empty?
   if (line.trim() === '') {
-    return [];
+    return null;
   }
 
   // split by |

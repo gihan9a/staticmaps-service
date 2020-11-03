@@ -513,9 +513,9 @@ describe('Test utils.js functions', () => {
       // @tood test weight boundary values
     });
     test('test parsePath with valid parameters', () => {
-      expect(parsePath()).toStrictEqual([]);
-      expect(parsePath('')).toStrictEqual([]);
-      expect(parsePath(' ')).toStrictEqual([]);
+      expect(parsePath()).toStrictEqual(null);
+      expect(parsePath('')).toStrictEqual(null);
+      expect(parsePath(' ')).toStrictEqual(null);
       expect(parsePath('52.482659,13.399259')).toStrictEqual({
         coords: [[13.399259, 52.482659]],
         color: '#000000BB',
