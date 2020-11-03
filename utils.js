@@ -608,6 +608,9 @@ module.exports.parsePath = (line = '') => {
 
   // validate geo locations
   const parsedLocations = parseLocations(locations);
+  if (parsedLocations.length < 2) {
+    throw new Error('There must be two or more locations to draw a path');
+  }
 
   // parse marker configurations
   const configs = parsePathConfigs(

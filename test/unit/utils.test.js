@@ -480,57 +480,47 @@ describe('Test utils.js functions', () => {
         parsePath('||');
       }).toThrow('No path locations found');
       expect(() => {
-        parsePath('color:none| 52.482659,52.482659|');
+        parsePath('color:none| 52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:none"');
       expect(() => {
-        parsePath('color:F83A0089| 52.482659,52.482659|');
+        parsePath('color:F83A0089| 52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:F83A0089"');
       expect(() => {
-        parsePath('color:#S83A0089| 52.482659,52.482659|');
+        parsePath('color:#S83A0089| 52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:#S83A0089"');
       expect(() => {
-        parsePath('color:#F83A00| 52.482659,52.482659|');
+        parsePath('color:#F83A00| 52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:#F83A00"');
       expect(() => {
-        parsePath('weight:|52.482659,52.482659|');
+        parsePath('weight:|52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid path configuration "weight:"');
       expect(() => {
-        parsePath('weight:string|52.482659,52.482659|');
+        parsePath('weight:string|52.482659,52.482659|62.107733,-145.541936');
       }).toThrow(
         'Invalid weight configuration "weight:string". Should be integer type eg. 4',
       );
       expect(() => {
-        parsePath('weight:3.3|52.482659,52.482659|');
+        parsePath('weight:3.3|52.482659,52.482659|62.107733,-145.541936');
       }).toThrow(
         'Invalid weight configuration "weight:3.3". Should be integer type eg. 4',
       );
       expect(() => {
-        parsePath('color:|weight:3|52.482659,52.482659|');
+        parsePath('color:|weight:3|52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid path configuration "color:"');
       expect(() => {
-        parsePath('color:red|weight:|52.482659,52.482659|');
+        parsePath(
+          'color:red|weight:|52.482659,52.482659|62.107733,-145.541936',
+        );
       }).toThrow('Invalid path configuration "weight:"');
+      expect(() => {
+        parsePath('52.482659,13.399259');
+      }).toThrow('There must be two or more locations to draw a path');
       // @tood test weight boundary values
     });
     test('test parsePath with valid parameters', () => {
       expect(parsePath()).toStrictEqual(null);
       expect(parsePath('')).toStrictEqual(null);
       expect(parsePath(' ')).toStrictEqual(null);
-      expect(parsePath('52.482659,13.399259')).toStrictEqual({
-        coords: [[13.399259, 52.482659]],
-        color: '#000000BB',
-        width: 5,
-      });
-      expect(parsePath('color:red|52.482659,13.399259')).toStrictEqual({
-        coords: [[13.399259, 52.482659]],
-        color: '#FF0000BB',
-        width: 5,
-      });
-      expect(parsePath('color:#F83A0089|52.482659,13.399259')).toStrictEqual({
-        coords: [[13.399259, 52.482659]],
-        color: '#F83A0089',
-        width: 5,
-      });
       expect(
         parsePath('color:#F83A0089|52.482659,13.399259|62.107733,-145.541936'),
       ).toStrictEqual({
@@ -552,11 +542,14 @@ describe('Test utils.js functions', () => {
         width: 5,
       });
       expect(
-        parsePath('weight:1| 52.482659,13.399259| 62.107733,-145.541936'),
+        parsePath(
+          'weight:1| 52.482659,13.399259| 62.107733,-145.541936 | 53.482659,14.399259',
+        ),
       ).toStrictEqual({
         coords: [
           [13.399259, 52.482659],
           [-145.541936, 62.107733],
+          [14.399259, 53.482659],
         ],
         color: '#000000BB',
         width: 1,
