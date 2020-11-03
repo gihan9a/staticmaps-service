@@ -143,6 +143,20 @@ module.exports.parseZoom = (level = undefined) => {
 };
 
 /**
+ * Serialize coordinates into string
+ *
+ * @param {array} coords Array of coordinates
+ *
+ * @returns {string} Serialized string
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const serializeCoords = (coords = []) => coords
+  .map((coord) => `${coord[0]},${coord[1]}`)
+  .sort()
+  .join('|');
+
+/**
  * Serialize markers
  *
  * @param {array} markers Map markers configurations
@@ -155,7 +169,25 @@ const serializeMarkers = (markers = []) => markers
   .map(
     ({
       coord, img, height, width, offsetX, offsetY,
-    }) => `coord:${coord},img:${img},height:${height},width:${width},offsetX:${offsetX},offsetY:${offsetY}`,
+    }) => `coord:${serializeCoords([
+      coord,
+    ])},img:${img},height:${height},width:${width},offsetX:${offsetX},offsetY:${offsetY}`,
+  )
+  .sort()
+  .reduce((acc, curr) => `${acc}${curr}`, '');
+
+/**
+ * Serialize lines
+ *
+ * @param {array} lines Map lines configurations
+ *
+ * @returns {string} serialize string
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const serializeLines = (lines = []) => lines
+  .map(
+    ({ coords, color, width }) => `coords:${serializeCoords(coords)},color:${color},width:${width}`,
   )
   .sort()
   .reduce((acc, curr) => `${acc}${curr}`, '');
@@ -199,6 +231,7 @@ const getImageName = ({
   zoom,
   markers = [],
   texts = [],
+  lines = [],
 }) => {
   // validate required options
   const required = {
@@ -213,16 +246,23 @@ const getImageName = ({
     }
   }
 
-  if (center.length === 0 && markers.length === 0 && texts.length === 0) {
-    throw new Error('At least center, markers or texts parameter is required');
+  if (
+    center.length === 0
+    && markers.length === 0
+    && lines.length === 0
+    && texts.length === 0
+  ) {
+    throw new Error(
+      'At least center, markers, path or texts parameter is required',
+    );
   }
 
   // build array using all the parameters
-  const data = `mimeExt:${mimeExt};size:${size.width},${
-    size.height
-  };zoom:${zoom};markers:${serializeMarkers(markers)};texts:${serializeTexts(
-    texts,
-  )}`;
+  const data = `center:${serializeCoords([center])};mimeExt:${mimeExt};size:${
+    size.width
+  },${size.height};zoom:${zoom};markers:${serializeMarkers(
+    markers,
+  )};texts:${serializeTexts(texts)};lines:${serializeLines(lines)}`;
 
   return md5(data);
 };
@@ -416,9 +456,7 @@ const parseLocations = (locations) => locations.map((location) => {
         `Invalid location found "${location}". Eg. -12.445,78.12484`,
       );
     }
-    throw new Error(
-      `Invalid location found "${location}". ${err.message}`,
-    );
+    throw new Error(`Invalid location found "${location}". ${err.message}`);
   }
 });
 
