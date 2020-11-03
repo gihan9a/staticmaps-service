@@ -483,8 +483,8 @@ describe('Test utils.js functions', () => {
         parsePath('color:none| 52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:none"');
       expect(() => {
-        parsePath('color:F83A0089| 52.482659,52.482659|62.107733,-145.541936');
-      }).toThrow('Invalid color configuration "color:F83A0089"');
+        parsePath('color:#F83A0089| 52.482659,52.482659|62.107733,-145.541936');
+      }).toThrow('Invalid color configuration "color:#F83A0089"');
       expect(() => {
         parsePath('color:#S83A0089| 52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:#S83A0089"');
@@ -522,7 +522,7 @@ describe('Test utils.js functions', () => {
       expect(parsePath('')).toStrictEqual(null);
       expect(parsePath(' ')).toStrictEqual(null);
       expect(
-        parsePath('color:#F83A0089|52.482659,13.399259|62.107733,-145.541936'),
+        parsePath('color:F83A0089|52.482659,13.399259|62.107733,-145.541936'),
       ).toStrictEqual({
         coords: [
           [13.399259, 52.482659],
@@ -532,7 +532,7 @@ describe('Test utils.js functions', () => {
         width: 5,
       });
       expect(
-        parsePath('color:#F83A0089| 52.482659,13.399259| 62.107733,-145.541936'),
+        parsePath('color:F83A0089| 52.482659,13.399259| 62.107733,-145.541936'),
       ).toStrictEqual({
         coords: [
           [13.399259, 52.482659],
@@ -556,7 +556,7 @@ describe('Test utils.js functions', () => {
       });
       expect(
         parsePath(
-          'weight:1|color:#F83A0089| 52.482659,13.399259| 62.107733,-145.541936',
+          'weight:1|color:F83A0089| 52.482659,13.399259| 62.107733,-145.541936',
         ),
       ).toStrictEqual({
         coords: [

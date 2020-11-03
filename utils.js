@@ -516,8 +516,8 @@ module.exports.parseMarkers = (markers = '') => {
  */
 const isValidPathColor = (color) => {
   // is 32bit hex?
-  if (/^#[0-9A-F]{8}$/i.test(color)) {
-    return ['color', color.toUpperCase()];
+  if (/^[0-9A-F]{8}$/i.test(color)) {
+    return ['color', `#${color.toUpperCase()}`];
   }
   // default path transparancy
   const transparancy = 'BB';
