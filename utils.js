@@ -174,7 +174,7 @@ const serializeMarkers = (markers = []) => markers
     ])},img:${img},height:${height},width:${width},offsetX:${offsetX},offsetY:${offsetY}`,
   )
   .sort()
-  .reduce((acc, curr) => `${acc}${curr}`, '');
+  .join('|');
 
 /**
  * Serialize lines
@@ -190,7 +190,7 @@ const serializeLines = (lines = []) => lines
     ({ coords, color, width }) => `coords:${serializeCoords(coords)},color:${color},width:${width}`,
   )
   .sort()
-  .reduce((acc, curr) => `${acc}${curr}`, '');
+  .join('|');
 
 /**
  * Serialize texts
@@ -208,7 +208,7 @@ const serializeTexts = (texts = []) => texts
     }) => `coord:${coord},text:${text},color:${color},width:${width},fill:${fill},size:${size},font:${font},anchor:${anchor}`,
   )
   .sort()
-  .reduce((acc, curr) => `${acc}${curr}`, '');
+  .join('|');
 
 /**
  * Generate image name from the map parameters
