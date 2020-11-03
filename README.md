@@ -42,7 +42,7 @@ This project follows `Airbnb` javascript style guide.
 @TODO
 
 ## How to use?
-@TODO
+Please refer the [Wiki](./wiki)
 
 ## Contribute
 
