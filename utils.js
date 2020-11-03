@@ -465,3 +465,158 @@ module.exports.parseMarkers = (markers = '') => {
     ...configs,
   }));
 };
+
+/**
+ * Is valid color for path?
+ *
+ * @param {string} color 32 bit hex color string or color name
+ *
+ * @returns {string} color string as 32bit hex number
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidPathColor = (color) => {
+  // is 32bit hex?
+  if (/^#[0-9A-F]{8}$/i.test(color)) {
+    return ['color', color.toUpperCase()];
+  }
+  // default path transparancy
+  const transparancy = 'BB';
+  const validColors = {
+    black: `#000000${transparancy}`,
+    brown: `#A52A2A${transparancy}`,
+    green: `#008000${transparancy}`,
+    purple: `#800080${transparancy}`,
+    yellow: `#FFFF00${transparancy}`,
+    blue: `#0000FF${transparancy}`,
+    gray: `#808080${transparancy}`,
+    orange: `#FFA500${transparancy}`,
+    red: `#FF0000${transparancy}`,
+    white: `#FFFFFF${transparancy}`,
+  };
+  if (validColors[color.trim()]) {
+    return ['color', validColors[color.trim()]];
+  }
+  throw new Error(`Invalid color configuration "color:${color}"`);
+};
+
+/**
+ * Validate path stroke weight
+ *
+ * @param {string} weight Path weight as string
+ *
+ * @returns {array} Returns key/value pair of weight configuration
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidPathWeight = (weight) => {
+  if (!/^[0-9]*$/.test(weight)) {
+    throw new Error(
+      `Invalid weight configuration "weight:${weight}". Should be integer type eg. 4`,
+    );
+  }
+  return ['width', parseInt(weight, 10)];
+};
+
+/**
+ * Validate path configuration
+ *
+ * @param {array} Configration as key/value pair
+ *
+ * @returns {array} Configuration as key/value pair
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidPathConfig = ([key, value]) => {
+  // basic validate of key and value
+  if (!key || !value) {
+    throw new Error(`Invalid path configuration "${key}:${value}"`);
+  }
+
+  switch (key) {
+    case 'color':
+      return isValidPathColor(value);
+    case 'weight':
+      return isValidPathWeight(value);
+    default:
+      throw new Error(`Invalid path configuration "${key}:${value}"`);
+  }
+};
+
+/**
+ * Parse path configurations
+ *
+ * @param {array} configs Configurations as array of strings
+ *
+ * @returns {object} Path configurations as object
+ *
+ * @throws Error if validation falils
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const parsePathConfigs = (configs = []) => {
+  const data = {};
+  if (configs.length > 0) {
+    configs.forEach((config) => {
+      const [key, value] = isValidPathConfig(config.split(':'));
+      data[key] = value;
+    });
+  }
+
+  // set default configurations if not present
+  return {
+    color: '#000000BB',
+    width: 5,
+    ...data,
+  };
+};
+
+/**
+ * Parse path query string
+ *
+ * @param {string} line Path query string
+ *
+ * @returns {object} objects
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.parsePath = (line = '') => {
+  // is not string?
+  if (typeof line !== 'string') {
+    throw new Error('path should be string type');
+  }
+
+  // is empty?
+  if (line.trim() === '') {
+    return [];
+  }
+
+  // split by |
+  const options = line.trim().split('|');
+  const locations = options.filter((marker) => /,/.test(marker));
+  if (locations.length === 0) {
+    throw new Error('No path locations found');
+  }
+
+  // validate geo locations
+  const parsedLocations = parseLocations(locations);
+
+  // parse marker configurations
+  const configs = parsePathConfigs(
+    options.filter((marker) => /:/.test(marker)),
+  );
+
+  // build final marker configurations
+  return {
+    coords: parsedLocations,
+    ...configs,
+  };
+};
