@@ -15,6 +15,7 @@ const {
   getImageCacheData,
   parseFormat,
   parseMarkers,
+  parsePath,
 } = require('./utils');
 
 fastify.get('/', async (request, reply) => {
@@ -23,9 +24,12 @@ fastify.get('/', async (request, reply) => {
     if (
       request.query.center === undefined
       && request.query.markers === undefined
+      && request.query.path === undefined
       && request.query.texts === undefined
     ) {
-      throw new Error('At least center, markers or texts parameter is required');
+      throw new Error(
+        'At least center, markers, path or texts parameter is required',
+      );
     }
     // parse and validate query parameters
     let center = [];
@@ -36,6 +40,7 @@ fastify.get('/', async (request, reply) => {
     const zoom = request.query.zoom && parseZoom(request.query.zoom);
     const { contentType, extension } = parseFormat(request.query.format);
     const markers = parseMarkers(request.query.markers);
+    const lines = parsePath(request.query.path);
 
     const { isCached, path: imagePath } = getImageCacheData({
       center,
@@ -43,6 +48,7 @@ fastify.get('/', async (request, reply) => {
       mimeExt: extension,
       zoom,
       markers,
+      lines: [lines],
     });
 
     // is there a cached copy?
@@ -65,6 +71,12 @@ fastify.get('/', async (request, reply) => {
         map.addMarker(marker);
       });
     }
+
+    // path
+    if (lines) {
+      map.addLine(lines);
+    }
+
     // render new image
     const buffer = await map
       .render(center.length > 0 ? center : undefined, zoom)
