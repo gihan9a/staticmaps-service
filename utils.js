@@ -258,12 +258,11 @@ const getImageName = ({
   }
 
   // build array using all the parameters
-  const data = `center:${serializeCoords([center])};mimeExt:${mimeExt};size:${
+  const data = `center{${serializeCoords([center])}}mimeExt{${mimeExt}}size{${
     size.width
-  },${size.height};zoom:${zoom};markers:${serializeMarkers(
+  },${size.height}}zoom{${zoom}}markers{${serializeMarkers(
     markers,
-  )};texts:${serializeTexts(texts)};lines:${serializeLines(lines)}`;
-
+  )}}texts{${serializeTexts(texts)}}lines{${serializeLines(lines)}}`;
   return md5(data);
 };
 
