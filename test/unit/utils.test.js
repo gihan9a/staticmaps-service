@@ -378,7 +378,7 @@ describe('Test utils.js functions', () => {
       }).toThrow('No marker locations found');
       expect(() => {
         parseMarkers('|, |');
-      }).toThrow('Invalid marker location found ", ". Eg. -12.445,78.12484');
+      }).toThrow('Invalid location found ", ". Eg. -12.445,78.12484');
       expect(() => {
         parseMarkers('62.107733|-145.541936');
       }).toThrow('No marker locations found');
@@ -387,7 +387,7 @@ describe('Test utils.js functions', () => {
           '62.107733,-145.541936|62.107733,-146.54193662.107733,-147.541936|62.107733,-148.541936',
         );
       }).toThrow(
-        'Invalid marker location found "62.107733,-146.54193662.107733,-147.541936". Eg. -12.445,78.12484',
+        'Invalid location found "62.107733,-146.54193662.107733,-147.541936". Eg. -12.445,78.12484',
       );
       expect(() => {
         parseMarkers('-145.541936');
@@ -398,24 +398,24 @@ describe('Test utils.js functions', () => {
       expect(() => {
         parseMarkers('62.107733,-195.541936');
       }).toThrow(
-        'Invalid marker location found "62.107733,-195.541936". Longitude should be within -180 and 180',
+        'Invalid location found "62.107733,-195.541936". Longitude should be within -180 and 180',
       );
       expect(() => {
         parseMarkers('62.107733,-145.541936|92.107733,-145.541936');
       }).toThrow(
-        'Invalid marker location found "92.107733,-145.541936". Latitude should be within -90 and 90',
+        'Invalid location found "92.107733,-145.541936". Latitude should be within -90 and 90',
       );
       expect(() => {
         parseMarkers('||62.107733,-145.541936|92.107733,-145.541936');
       }).toThrow(
-        'Invalid marker location found "92.107733,-145.541936". Latitude should be within -90 and 90',
+        'Invalid location found "92.107733,-145.541936". Latitude should be within -90 and 90',
       );
 
       // marker configurations
       expect(() => {
         parseMarkers('style:none62.107733,-145.541936');
       }).toThrow(
-        'Invalid marker location found "style:none62.107733,-145.541936". Eg. -12.445,78.12484',
+        'Invalid location found "style:none62.107733,-145.541936". Eg. -12.445,78.12484',
       );
       expect(() => {
         parseMarkers('style:none|62.107733,-145.541936');

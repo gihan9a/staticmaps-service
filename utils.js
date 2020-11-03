@@ -407,17 +407,17 @@ const parseMarkerConfigs = (configs = []) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-const validateMarkerLocations = (locations) => locations.map((location) => {
+const parseLocations = (locations) => locations.map((location) => {
   try {
     return this.parseGeoCoordinate(location);
   } catch (err) {
     if (/^Invalid geo coordinate format/.test(err.message)) {
       throw new Error(
-        `Invalid marker location found "${location}". Eg. -12.445,78.12484`,
+        `Invalid location found "${location}". Eg. -12.445,78.12484`,
       );
     }
     throw new Error(
-      `Invalid marker location found "${location}". ${err.message}`,
+      `Invalid location found "${location}". ${err.message}`,
     );
   }
 });
@@ -452,7 +452,7 @@ module.exports.parseMarkers = (markers = '') => {
   }
 
   // validate geo locations
-  const parsedLocations = validateMarkerLocations(locations);
+  const parsedLocations = parseLocations(locations);
 
   // parse marker configurations
   const configs = parseMarkerConfigs(
