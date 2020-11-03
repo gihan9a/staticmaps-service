@@ -4,6 +4,7 @@
 This project is an alternative to Google Static Map API.  
 
 [![License](https://img.shields.io/github/license/gihan10/staticmap-service)](https://github.com/gihan10/staticmap-service/blob/main/LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service?ref=badge_shield) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1a4d865272044212860e5c1b1a090c26)](https://app.codacy.com/gh/gihan10/staticmap-service?utm_source=github.com&utm_medium=referral&utm_content=gihan10/staticmap-service&utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/f4ea491b97724199a871de00ea437563)](https://www.codacy.com/gh/gihan10/staticmap-service/dashboard?utm_source=github.com&utm_medium=referral&utm_content=gihan10/staticmap-service&utm_campaign=Badge_Coverage)
 
@@ -60,3 +61,5 @@ Contributions are welcome to the project. Please kindly go through the [contribu
 ## License
 This work is licensed under the terms of the MIT license.  
 For a copy, see <https://opensource.org/licenses/MIT>.
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service?ref=badge_large)
