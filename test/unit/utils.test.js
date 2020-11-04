@@ -595,7 +595,6 @@ describe('Test utils.js functions', () => {
           [13.399259, 52.482659],
           [14.541936, 62.107733],
           [13.499259, 52.412659],
-          [13.399259, 52.482659],
         ],
         color: process.env.PATH_COLOR_DEFAULT,
         fill: '#F83A0089',

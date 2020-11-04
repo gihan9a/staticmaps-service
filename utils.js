@@ -677,15 +677,8 @@ module.exports.parsePath = (line = '') => {
     options.filter((marker) => /:/.test(marker)),
   );
 
-  // has `fillcolor` style set but first and last locations are not same?
+  // has not set `fillcolor` but first and last locations are same?
   if (
-    configs.fill
-    && parsedLocations.length > 2
-    && !areFirstAndLastCoordsSame(parsedLocations)
-  ) {
-    // then copy the first location as last location
-    parsedLocations.push(parsedLocations[0]);
-  } else if (
     configs.fill === undefined
     && parsedLocations.length > 2
     && areFirstAndLastCoordsSame(parsedLocations)
@@ -693,6 +686,7 @@ module.exports.parsePath = (line = '') => {
     // add default fill color
     configs.fill = process.env.POLYGON_FILL_COLOR_DEFAULT;
   } else if (configs.fill && parsedLocations.length === 2) {
+    // there are enough locations to draw a polygon
     // remove fill color
     delete configs.fill;
   }
