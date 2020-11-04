@@ -480,7 +480,7 @@ const isValidWeight = (weight) => {
  */
 const isValidFont = (value) => {
   const valid = ['Arial', 'Times New Roman', 'Courier New'];
-  if (valid.includes(value.trim())) {
+  if (!valid.includes(value.trim())) {
     throw new Error(`Invalid font configuration "font:${value}"`);
   }
   return ['font', value.trim()];
@@ -524,7 +524,7 @@ const isValidAnchor = (value) => {
 
   const val = value.trim().toLowerCase();
   if (!valid.includes(val)) {
-    throw new Error(`Unsupported anchor configuration "anchor:${value}"`);
+    throw new Error(`Invalid anchor configuration "anchor:${value}"`);
   }
 
   return ['anchor', val];
@@ -546,7 +546,7 @@ const isValidAnchor = (value) => {
 const isValidTextValue = (value, key, queryKey) => {
   const val = value.trim();
   if (!/^[\w\s-]*$/.test(value)) {
-    throw new Error(`Invalid ${queryKey} configuration ${queryKey}:${value}`);
+    throw new Error(`Invalid ${queryKey} configuration "${queryKey}:${value}"`);
   }
 
   return [key, val];
@@ -778,6 +778,67 @@ module.exports.parsePath = (line = '') => {
   // build final path configurations
   return {
     coords: parsedLocations,
+    ...configs,
+  };
+};
+
+/**
+ * Parse text query string
+ *
+ * @param {string} texts Text query string
+ *
+ * @returns {object} Text configurations
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.parseText = (texts) => {
+  // is not string?
+  if (typeof texts !== 'string') {
+    throw new Error('text should be string type');
+  }
+
+  // is empty?
+  if (texts.trim() === '') {
+    return null;
+  }
+
+  // split by |
+  const options = texts.trim().split('|');
+  const locations = options.filter((option) => /,/.test(option));
+  if (locations.length === 0) {
+    throw new Error('No text location found');
+  }
+
+  // validate geo locations
+  const parsedLocations = parseLocations(locations);
+  if (parsedLocations.length > 1) {
+    throw new Error('Multiple locations found as text location');
+  }
+
+  // parse text configurations
+  const configs = parseConfigs(
+    'text',
+    options.filter((option) => /:/.test(option)),
+    {
+      size: process.env.TEXT_SIZE,
+      width: process.env.TEXT_WIDTH,
+      fill: process.env.TEXT_FILL_COLOR,
+      color: process.env.TEXT_COLOR,
+      font: process.env.TEXT_FONT,
+      anchor: 'middle',
+    },
+  );
+
+  // content configuration is required
+  if (configs.text === undefined) {
+    throw new Error('content configuration is required');
+  }
+
+  // build final text configurations
+  return {
+    coord: parsedLocations[0],
     ...configs,
   };
 };

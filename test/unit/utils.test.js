@@ -509,10 +509,14 @@ describe('Test utils.js functions', () => {
         parsePath('color:|weight:3|52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid path configuration "color:"');
       expect(() => {
-        parsePath('fillcolor:|weight:3|52.482659,52.482659|62.107733,-145.541936');
+        parsePath(
+          'fillcolor:|weight:3|52.482659,52.482659|62.107733,-145.541936',
+        );
       }).toThrow('Invalid path configuration "fillcolor:"');
       expect(() => {
-        parsePath('fillcolor:WASDGWEE|weight:3|52.482659,52.482659|62.107733,-145.541936');
+        parsePath(
+          'fillcolor:WASDGWEE|weight:3|52.482659,52.482659|62.107733,-145.541936',
+        );
       }).toThrow('Invalid fillcolor configuration "fillcolor:WASDGWEE"');
       expect(() => {
         parsePath(
@@ -615,6 +619,67 @@ describe('Test utils.js functions', () => {
         fill: process.env.POLYGON_FILL_COLOR_DEFAULT,
         color: '#F83A0089',
         width: 1,
+      });
+    });
+  });
+
+  describe('test parseText function', () => {
+    test('test parseText with invalid arguments', () => {
+      expect(() => {
+        parseText('content:|62.107733,14.541936');
+      }).toThrow('Invalid text configuration "content:"');
+      expect(() => {
+        parseText('size:4|62.107733,14.541936');
+      }).toThrow('Invalid text configuration "size:4"');
+      expect(() => {
+        parseText('fontsize:4|62.107733,14.541936');
+      }).toThrow('content configuration is required');
+      expect(() => {
+        parseText('content:Hello$|62.107733,14.541936');
+      }).toThrow('Invalid content configuration "content:Hello$"');
+      expect(() => {
+        parseText('content:Hello|62.107733,14.541936|52.482659,13.399259');
+      }).toThrow('Multiple locations found as text location');
+      expect(() => {
+        parseText('content:Hello|color:butter|62.107733,14.541936');
+      }).toThrow('Invalid color configuration "color:butter"');
+      expect(() => {
+        parseText('content:Hello|size:small|62.107733,14.541936');
+      }).toThrow('Invalid text configuration "size:small"');
+      expect(() => {
+        parseText('content:Hello|font:Impact|62.107733,14.541936');
+      }).toThrow('Invalid font configuration "font:Impact"');
+      expect(() => {
+        parseText('content:Hello|anchor:top|62.107733,14.541936');
+      }).toThrow('Invalid anchor configuration "anchor:top"');
+      expect(() => {
+        parseText('content:Hello|fillcolor:butter|62.107733,14.541936');
+      }).toThrow('Invalid fillcolor configuration "fillcolor:butter"');
+    });
+    test('test parseText with valid arguments', () => {
+      expect(parseText('content:Hello|62.107733,14.541936')).toStrictEqual({
+        coord: [14.541936, 62.107733],
+        text: 'Hello',
+        color: process.env.TEXT_COLOR,
+        width: process.env.TEXT_WIDTH,
+        fill: process.env.TEXT_FILL_COLOR,
+        size: process.env.TEXT_SIZE,
+        font: process.env.TEXT_FONT,
+        anchor: 'middle',
+      });
+      expect(
+        parseText(
+          'content:Hello|color:red|weight:10|font:Times New Roman|fontsize:18|fillcolor:yellow|62.107733,14.541936',
+        ),
+      ).toStrictEqual({
+        coord: [14.541936, 62.107733],
+        text: 'Hello',
+        color: '#FF0000BB',
+        width: 10,
+        fill: '#FFFF00BB',
+        size: 18,
+        font: 'Times New Roman',
+        anchor: 'middle',
       });
     });
   });
