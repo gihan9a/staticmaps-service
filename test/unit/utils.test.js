@@ -10,6 +10,7 @@ const {
   parseFormat,
   parseMarkers,
   parsePath,
+  parseText,
 } = require('../../utils');
 
 describe('Test utils.js functions', () => {
@@ -426,7 +427,7 @@ describe('Test utils.js functions', () => {
       }).toThrow('Invalid marker configuration "color:"');
       expect(() => {
         parseMarkers('color:none|62.107733,-145.541936');
-      }).toThrow('Invalid marker color "none"');
+      }).toThrow('Invalid color configuration "color:none"');
     });
     test('test markersFunction with valid parameters', () => {
       expect(parseMarkers(undefined)).toStrictEqual([]);

@@ -350,6 +350,55 @@ module.exports.parseFormat = (format = '') => {
 };
 
 /**
+ * Color name/hex map and swap
+ *
+ * @param {string} value Color value
+ * @param {boolean} swap Swap the color name/hex
+ *
+ * @returns {string} Returns color name/hex
+ *
+ * @throws Error if unsupported color found
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const colorHexMap = (value, swap = false) => {
+  // default path transparancy
+  const transparancy = 'BB';
+  const colorHex = {
+    black: `#000000${transparancy}`,
+    brown: `#A52A2A${transparancy}`,
+    green: `#008000${transparancy}`,
+    purple: `#800080${transparancy}`,
+    yellow: `#FFFF00${transparancy}`,
+    blue: `#0000FF${transparancy}`,
+    gray: `#808080${transparancy}`,
+    orange: `#FFA500${transparancy}`,
+    red: `#FF0000${transparancy}`,
+    white: `#FFFFFF${transparancy}`,
+  };
+
+  // is color name given?
+  if (colorHex[value]) {
+    return swap ? colorHex[value] : value;
+  }
+
+  // is color hex value given?
+  if (/^#[0-9A-F]{8}$/i.test(value)) {
+    // swap the colorHex map
+    const hexColor = Object.keys(colorHex).reduce((obj, key) => {
+      // eslint-disable-next-line no-param-reassign
+      obj[colorHex[key]] = key;
+      return obj;
+    }, {});
+    if (hexColor[value]) {
+      return swap ? hexColor[value] : value;
+    }
+  }
+
+  throw new Error('Unsupported color');
+};
+
+/**
  * Get marker icon path
  *
  * @param {string} value Marker color
@@ -361,80 +410,214 @@ module.exports.parseFormat = (format = '') => {
  * @author Gihan S <gihanshp@gmail.com>
  */
 const getMarkerIcon = (value) => {
-  // is valid color option
-  if (
-    ![
-      'black',
-      'blue',
-      'green',
-      'orange',
-      'purple',
-      'red',
-      'white',
-      'yellow',
-    ].includes(value)
-  ) {
-    throw new Error(`Invalid marker color "${value}"`);
+  let val = value;
+  if (/^#[0-9A-F]{8}$/i.test(value)) {
+    val = colorHexMap(value, true);
+  } else {
+    val = colorHexMap(value);
   }
 
   // get the marker color image
-  return ['img', path.resolve(__dirname, `./assets/markers/${value}-32.png`)];
+  return ['img', path.resolve(__dirname, `./assets/markers/${val}-32.png`)];
 };
 
 /**
- * Validate configuration
+ * Is valid color?
  *
- * @param {array} Configuration as array
+ * @param {string} color 32 bit hex color string or color name
+ * @param {string} key Color key used in configuration
+ * @param {string} queryKey Color key used in query configuration
  *
- * @returns {array} Configuration key and value as array
+ * @returns {string} color string as 32bit hex number
  *
  * @throws Error if validation fails
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-const isValidMarkerConfig = ([key, value]) => {
-  // basic validate of key and value
-  if (!key || !value) {
-    throw new Error(`Invalid marker configuration "${key}:${value}"`);
+const isValidColor = (color, key, queryKey) => {
+  // is 32bit hex?
+  if (/^[0-9A-F]{8}$/i.test(color)) {
+    return [key, `#${color.toUpperCase()}`];
   }
 
-  switch (key) {
-    case 'color':
-      return getMarkerIcon(value);
-    default:
-      throw new Error(`Invalid marker configuration "${key}:${value}"`);
+  try {
+    return [key, colorHexMap(color.trim(), true)];
+  } catch (err) {
+    throw new Error(`Invalid ${queryKey} configuration "${queryKey}:${color}"`);
   }
 };
 
 /**
- * Parse and validate marker configurations
+ * Validate stroke weight
  *
- * @param {array} configs Configs to parse
+ * @param {string} weight Stroke weight as string
  *
- * @returns {object} marker configurations
+ * @returns {array} Returns key/value pair of weight configuration
  *
- * @throws Error if configurations fails
+ * @throws Error if validation fails
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-const parseMarkerConfigs = (configs = []) => {
+const isValidWeight = (weight) => {
+  if (!/^[0-9]*$/.test(weight)) {
+    throw new Error(
+      `Invalid weight configuration "weight:${weight}". Should be integer type eg. 4`,
+    );
+  }
+  return ['width', parseInt(weight, 10)];
+};
+
+/**
+ * Is valid font family
+ *
+ * @param {string} value Font family name
+ *
+ * @returns {array} Font key/value configuration
+ *
+ * @throws Error Returns error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidFont = (value) => {
+  const valid = ['Arial', 'Times New Roman', 'Courier New'];
+  if (valid.includes(value.trim())) {
+    throw new Error(`Invalid font configuration "font:${value}"`);
+  }
+  return ['font', value.trim()];
+};
+
+/**
+ * Validate font size
+ *
+ * @param {string} value Font size
+ *
+ * @returns {array} Font size configuration as key/value pair
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidFontSize = (value) => {
+  if (!/^[0-9]*$/.test(value.trim())) {
+    throw new Error(`Invalid fontsize configuration "fontsize:${value}"`);
+  }
+  return ['size', parseInt(value.trim(), 10)];
+};
+
+/**
+ * Is valid anchor configuration?
+ *
+ * @param {string} value Anchor value
+ *
+ * @returns {array} Anchor configuration as key/value pair
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidAnchor = (value) => {
+  const valid = [
+    'start',
+    'middle',
+    'end',
+  ];
+
+  const val = value.trim().toLowerCase();
+  if (!valid.includes(val)) {
+    throw new Error(`Unsupported anchor configuration "anchor:${value}"`);
+  }
+
+  return ['anchor', val];
+};
+
+/**
+ * Validate text description
+ *
+ * @param {string} value Text description
+ * @param {string} key Key used for library
+ * @param {string} queryKey API query key
+ *
+ * @returns {array} Returns text configuration as key/value pair
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidTextValue = (value, key, queryKey) => {
+  const val = value.trim();
+  if (!/^[\w\s-]*$/.test(value)) {
+    throw new Error(`Invalid ${queryKey} configuration ${queryKey}:${value}`);
+  }
+
+  return [key, val];
+};
+
+/**
+ * Validate configuration
+ *
+ * @param {string} type Configuration owner
+ * @param {array} param1 Cofiguration key/value pair
+ *
+ * @returns {array} Configuration as key/value pair
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidConfig = (type, [key, value]) => {
+  // basic validate of key and value
+  if (!key || !value) {
+    throw new Error(`Invalid ${type} configuration "${key}:${value}"`);
+  }
+
+  switch (key) {
+    case 'color': {
+      const ans = isValidColor(value, 'color', key);
+      if (type === 'marker') {
+        return getMarkerIcon(ans[1]);
+      }
+      return ans;
+    }
+    case 'weight':
+      return isValidWeight(value, 'weight', key);
+    case 'fillcolor':
+      return isValidColor(value, 'fill', key);
+    case 'content':
+      return isValidTextValue(value, 'text', key);
+    case 'font':
+      return isValidFont(value, 'font', key);
+    case 'fontsize':
+      return isValidFontSize(value, 'size', key);
+    case 'anchor':
+      return isValidAnchor(value, 'anchor', key);
+    default:
+      throw new Error(`Invalid ${type} configuration "${key}:${value}"`);
+  }
+};
+
+/**
+ * Parse configurations of the query string
+ *
+ * @param {string} type Configurations owner
+ * @param {array} configs Configurations as key/value pair
+ * @param {object} defaults Default configurations
+ *
+ * @returns {object} Returns configurations as key/value object
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const parseConfigs = (type, configs = [], defaults = {}) => {
   const data = {};
   if (configs.length > 0) {
     configs.forEach((config) => {
-      const [key, value] = isValidMarkerConfig(config.split(':'));
+      const [key, value] = isValidConfig(type, config.split(':'));
       data[key] = value;
     });
   }
-
-  // set default configurations if not present
-  const imgDefault = path.resolve(
-    __dirname,
-    `./assets/markers/${process.env.MARKER_COLOR_DEFAULT}-32.png`,
-  );
   return {
-    width: 32,
-    height: 32,
-    img: imgDefault,
+    ...defaults,
     ...data,
   };
 };
@@ -494,10 +677,21 @@ module.exports.parseMarkers = (markers = '') => {
 
   // validate geo locations
   const parsedLocations = parseLocations(locations);
+  // default marker icon
+  const imgDefault = path.resolve(
+    __dirname,
+    `./assets/markers/${process.env.MARKER_COLOR_DEFAULT}-32.png`,
+  );
 
   // parse marker configurations
-  const configs = parseMarkerConfigs(
+  const configs = parseConfigs(
+    'marker',
     options.filter((marker) => /:/.test(marker)),
+    {
+      width: 32,
+      height: 32,
+      img: imgDefault,
+    },
   );
 
   // build final marker configurations
@@ -505,121 +699,6 @@ module.exports.parseMarkers = (markers = '') => {
     coord: location,
     ...configs,
   }));
-};
-
-/**
- * Is valid color for path?
- *
- * @param {string} color 32 bit hex color string or color name
- * @param {string} key Color key used in configuration
- * @param {string} queryKey Color key used in query configuration
- *
- * @returns {string} color string as 32bit hex number
- *
- * @throws Error if validation fails
- *
- * @author Gihan S <gihanshp@gmail.com>
- */
-const isValidPathColor = (color, key, queryKey) => {
-  // is 32bit hex?
-  if (/^[0-9A-F]{8}$/i.test(color)) {
-    return [key, `#${color.toUpperCase()}`];
-  }
-  // default path transparancy
-  const transparancy = 'BB';
-  const validColors = {
-    black: `#000000${transparancy}`,
-    brown: `#A52A2A${transparancy}`,
-    green: `#008000${transparancy}`,
-    purple: `#800080${transparancy}`,
-    yellow: `#FFFF00${transparancy}`,
-    blue: `#0000FF${transparancy}`,
-    gray: `#808080${transparancy}`,
-    orange: `#FFA500${transparancy}`,
-    red: `#FF0000${transparancy}`,
-    white: `#FFFFFF${transparancy}`,
-  };
-  if (validColors[color.trim()]) {
-    return [key, validColors[color.trim()]];
-  }
-  throw new Error(`Invalid ${queryKey} configuration "${queryKey}:${color}"`);
-};
-
-/**
- * Validate path stroke weight
- *
- * @param {string} weight Path weight as string
- *
- * @returns {array} Returns key/value pair of weight configuration
- *
- * @throws Error if validation fails
- *
- * @author Gihan S <gihanshp@gmail.com>
- */
-const isValidPathWeight = (weight) => {
-  if (!/^[0-9]*$/.test(weight)) {
-    throw new Error(
-      `Invalid weight configuration "weight:${weight}". Should be integer type eg. 4`,
-    );
-  }
-  return ['width', parseInt(weight, 10)];
-};
-
-/**
- * Validate path configuration
- *
- * @param {array} Configration as key/value pair
- *
- * @returns {array} Configuration as key/value pair
- *
- * @throws Error if validation fails
- *
- * @author Gihan S <gihanshp@gmail.com>
- */
-const isValidPathConfig = ([key, value]) => {
-  // basic validate of key and value
-  if (!key || !value) {
-    throw new Error(`Invalid path configuration "${key}:${value}"`);
-  }
-
-  switch (key) {
-    case 'color':
-      return isValidPathColor(value, 'color', key);
-    case 'weight':
-      return isValidPathWeight(value);
-    case 'fillcolor':
-      return isValidPathColor(value, 'fill', key);
-    default:
-      throw new Error(`Invalid path configuration "${key}:${value}"`);
-  }
-};
-
-/**
- * Parse path configurations
- *
- * @param {array} configs Configurations as array of strings
- *
- * @returns {object} Path configurations as object
- *
- * @throws Error if validation falils
- *
- * @author Gihan S <gihanshp@gmail.com>
- */
-const parsePathConfigs = (configs = []) => {
-  const data = {};
-  if (configs.length > 0) {
-    configs.forEach((config) => {
-      const [key, value] = isValidPathConfig(config.split(':'));
-      data[key] = value;
-    });
-  }
-
-  // set default configurations if not present
-  return {
-    color: process.env.PATH_COLOR_DEFAULT,
-    width: 5,
-    ...data,
-  };
 };
 
 /**
@@ -661,7 +740,7 @@ module.exports.parsePath = (line = '') => {
 
   // split by |
   const options = line.trim().split('|');
-  const locations = options.filter((marker) => /,/.test(marker));
+  const locations = options.filter((option) => /,/.test(option));
   if (locations.length === 0) {
     throw new Error('No path locations found');
   }
@@ -672,9 +751,14 @@ module.exports.parsePath = (line = '') => {
     throw new Error('There must be two or more locations to draw a path');
   }
 
-  // parse marker configurations
-  const configs = parsePathConfigs(
-    options.filter((marker) => /:/.test(marker)),
+  // parse path configurations
+  const configs = parseConfigs(
+    'path',
+    options.filter((option) => /:/.test(option)),
+    {
+      color: process.env.PATH_COLOR_DEFAULT,
+      width: 5,
+    },
   );
 
   // has not set `fillcolor` but first and last locations are same?
@@ -691,7 +775,7 @@ module.exports.parsePath = (line = '') => {
     delete configs.fill;
   }
 
-  // build final marker configurations
+  // build final path configurations
   return {
     coords: parsedLocations,
     ...configs,
