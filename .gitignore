@@ -117,3 +117,7 @@ dist
 
 # image cache directory
 /cache/*
+
+
+# Following must be at the end of this file
+!.gitkeep
