@@ -11,6 +11,7 @@ const {
   parseMarkers,
   parsePath,
   parseText,
+  getContentType,
 } = require('../../utils');
 
 describe('Test utils.js functions', () => {
@@ -250,7 +251,7 @@ describe('Test utils.js functions', () => {
         coord: [13.437524, 52.4945528],
         text: 'My Text',
         size: 50,
-        width: '1px',
+        width: 1,
         fill: '#000000',
         color: '#ffffff',
         font: 'Calibri',
@@ -259,10 +260,18 @@ describe('Test utils.js functions', () => {
         coord: [13.430524, 52.4995528],
         text: 'My Text 2',
         size: 50,
-        width: '1px',
+        width: 1,
         fill: '#000000',
         color: '#ffffff',
         font: 'Calibri',
+      },
+    ],
+    lines: [
+      {
+        coords: [[13.437524, 52.4945528], [14.437524, 52.4945528], [15.437524, 53.4945528]],
+        color: '#ffffffff',
+        width: 1,
+        fill: '#00000088',
       },
     ],
   };
@@ -297,7 +306,7 @@ describe('Test utils.js functions', () => {
         size: 50,
         coord: [13.437524, 52.4945528],
         fill: '#000000',
-        width: '1px',
+        width: 1,
         color: '#ffffff',
       },
       {
@@ -305,15 +314,36 @@ describe('Test utils.js functions', () => {
         coord: [13.430524, 52.4995528],
         color: '#ffffff',
         text: 'My Text 2',
-        width: '1px',
+        width: 1,
         fill: '#000000',
         font: 'Calibri',
+      },
+    ],
+    lines: [
+      {
+        coords: [[13.437524, 52.4945528], [14.437524, 52.4945528], [15.437524, 53.4945528]],
+        fill: '#00000088',
+        width: 1,
+        color: '#ffffffff',
       },
     ],
   };
 
   // getImageName test
   describe('test getImageCacheData function', () => {
+    test('test getImageCacheData with invalid arguments', () => {
+      expect(() => {
+        getImageCacheData({});
+      }).toThrow('mimeExt is required');
+      expect(() => {
+        getImageCacheData({ mimeExt: 'jpg' });
+      }).toThrow('size is required');
+      expect(() => {
+        getImageCacheData({ mimeExt: 'jpg', size: '100x200' });
+      }).toThrow(
+        'At least center, markers, path or texts parameter is required',
+      );
+    });
     test('test getImageName', () => {
       expect(getImageCacheData(mapParameters1)).toStrictEqual(
         getImageCacheData(mapParameters2),
@@ -348,6 +378,10 @@ describe('Test utils.js functions', () => {
 
     // test with valid
     test('test parseFormat with valid parameters', () => {
+      expect(parseFormat()).toStrictEqual({
+        contentType: getContentType(process.env.IMAGE_FORMAT_DEFAULT),
+        extension: process.env.IMAGE_FORMAT_DEFAULT,
+      });
       expect(parseFormat('jpg')).toStrictEqual({
         contentType: 'image/jpg',
         extension: 'jpg',
@@ -626,6 +660,9 @@ describe('Test utils.js functions', () => {
   describe('test parseText function', () => {
     test('test parseText with invalid arguments', () => {
       expect(() => {
+        parseText(12);
+      }).toThrow('text should be string type');
+      expect(() => {
         parseText('content:|62.107733,14.541936');
       }).toThrow('Invalid text configuration "content:"');
       expect(() => {
@@ -637,6 +674,9 @@ describe('Test utils.js functions', () => {
       expect(() => {
         parseText('content:Hello$|62.107733,14.541936');
       }).toThrow('Invalid content configuration "content:Hello$"');
+      expect(() => {
+        parseText('content:Hello|fillcolor:butter');
+      }).toThrow('No text location found');
       expect(() => {
         parseText('content:Hello|62.107733,14.541936|52.482659,13.399259');
       }).toThrow('Multiple locations found as text location');
@@ -655,8 +695,14 @@ describe('Test utils.js functions', () => {
       expect(() => {
         parseText('content:Hello|fillcolor:butter|62.107733,14.541936');
       }).toThrow('Invalid fillcolor configuration "fillcolor:butter"');
+      expect(() => {
+        parseText('content:Hello|fontsize:small|62.107733,14.541936');
+      }).toThrow('Invalid fontsize configuration "fontsize:small"');
     });
     test('test parseText with valid arguments', () => {
+      expect(parseText()).toBe(null);
+      expect(parseText('')).toBe(null);
+      expect(parseText(' ')).toBe(null);
       expect(parseText('content:Hello|62.107733,14.541936')).toStrictEqual({
         coord: [14.541936, 62.107733],
         text: 'Hello',
@@ -669,7 +715,7 @@ describe('Test utils.js functions', () => {
       });
       expect(
         parseText(
-          'content:Hello|color:red|weight:10|font:Times New Roman|fontsize:18|fillcolor:yellow|62.107733,14.541936',
+          'content:Hello|color:red|weight:10|font:Times New Roman|fontsize:18|fillcolor:yellow|anchor:start|62.107733,14.541936',
         ),
       ).toStrictEqual({
         coord: [14.541936, 62.107733],
@@ -679,7 +725,7 @@ describe('Test utils.js functions', () => {
         fill: '#FFFF00BB',
         size: 18,
         font: 'Times New Roman',
-        anchor: 'middle',
+        anchor: 'start',
       });
     });
   });

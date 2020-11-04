@@ -311,7 +311,7 @@ module.exports.getImageCacheData = ({ mimeExt, ...rest }) => {
   };
 };
 
-const getContentType = (format) => `image/${format}`;
+module.exports.getContentType = (format) => `image/${format}`;
 
 /**
  * Parse and validate image format.
@@ -331,7 +331,7 @@ module.exports.parseFormat = (format = '') => {
   // if not set send default
   if (format.trim() === '') {
     return {
-      contentType: getContentType(process.env.IMAGE_FORMAT_DEFAULT),
+      contentType: this.getContentType(process.env.IMAGE_FORMAT_DEFAULT),
       extension: process.env.IMAGE_FORMAT_DEFAULT,
     };
   }
@@ -344,7 +344,7 @@ module.exports.parseFormat = (format = '') => {
     );
   }
   return {
-    contentType: getContentType(formatLower),
+    contentType: this.getContentType(formatLower),
     extension: formatLower,
   };
 };
@@ -410,15 +410,10 @@ const colorHexMap = (value, swap = false) => {
  * @author Gihan S <gihanshp@gmail.com>
  */
 const getMarkerIcon = (value) => {
-  let val = value;
-  if (/^#[0-9A-F]{8}$/i.test(value)) {
-    val = colorHexMap(value, true);
-  } else {
-    val = colorHexMap(value);
-  }
+  const color = colorHexMap(value, true);
 
   // get the marker color image
-  return ['img', path.resolve(__dirname, `./assets/markers/${val}-32.png`)];
+  return ['img', path.resolve(__dirname, `./assets/markers/${color}-32.png`)];
 };
 
 /**
@@ -793,7 +788,7 @@ module.exports.parsePath = (line = '') => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.parseText = (texts) => {
+module.exports.parseText = (texts = '') => {
   // is not string?
   if (typeof texts !== 'string') {
     throw new Error('text should be string type');
