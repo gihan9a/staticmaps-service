@@ -22,6 +22,8 @@ jobs:
       ZOOM_MIN: ${{secrets.ZOOM_MIN}}
       ZOOM_MAX: ${{secrets.ZOOM_MAX}}
       IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
+      PATH_COLOR_DEFAULT: ${{secrets.PATH_COLOR_DEFAULT}}
+      POLYGON_FILL_COLOR_DEFAULT: ${{secrets.POLYGON_FILL_COLOR_DEFAULT}}
       CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
       CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
     strategy:
