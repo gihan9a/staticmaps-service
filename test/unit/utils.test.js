@@ -508,6 +508,12 @@ describe('Test utils.js functions', () => {
         parsePath('color:|weight:3|52.482659,52.482659|62.107733,-145.541936');
       }).toThrow('Invalid path configuration "color:"');
       expect(() => {
+        parsePath('fillcolor:|weight:3|52.482659,52.482659|62.107733,-145.541936');
+      }).toThrow('Invalid path configuration "fillcolor:"');
+      expect(() => {
+        parsePath('fillcolor:WASDGWEE|weight:3|52.482659,52.482659|62.107733,-145.541936');
+      }).toThrow('Invalid fillcolor configuration "fillcolor:WASDGWEE"');
+      expect(() => {
         parsePath(
           'color:red|weight:|52.482659,52.482659|62.107733,-145.541936',
         );
@@ -563,6 +569,50 @@ describe('Test utils.js functions', () => {
           [13.399259, 52.482659],
           [-145.541936, 62.107733],
         ],
+        color: '#F83A0089',
+        width: 1,
+      });
+
+      // test polygons
+      expect(
+        parsePath(
+          'weight:1|fillcolor:F83A0089| 52.482659,13.399259| 62.107733,14.541936',
+        ),
+      ).toStrictEqual({
+        coords: [
+          [13.399259, 52.482659],
+          [14.541936, 62.107733],
+        ],
+        color: process.env.PATH_COLOR_DEFAULT,
+        width: 1,
+      });
+      expect(
+        parsePath(
+          'weight:1|fillcolor:F83A0089| 52.482659,13.399259| 62.107733,14.541936|52.412659,13.499259',
+        ),
+      ).toStrictEqual({
+        coords: [
+          [13.399259, 52.482659],
+          [14.541936, 62.107733],
+          [13.499259, 52.412659],
+          [13.399259, 52.482659],
+        ],
+        color: process.env.PATH_COLOR_DEFAULT,
+        fill: '#F83A0089',
+        width: 1,
+      });
+      expect(
+        parsePath(
+          'weight:1|color:F83A0089| 52.482659,13.399259| 62.107733,14.541936|52.412659,13.499259|52.482659,13.399259',
+        ),
+      ).toStrictEqual({
+        coords: [
+          [13.399259, 52.482659],
+          [14.541936, 62.107733],
+          [13.499259, 52.412659],
+          [13.399259, 52.482659],
+        ],
+        fill: process.env.POLYGON_FILL_COLOR_DEFAULT,
         color: '#F83A0089',
         width: 1,
       });

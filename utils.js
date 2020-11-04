@@ -187,7 +187,11 @@ const serializeMarkers = (markers = []) => markers
  */
 const serializeLines = (lines = []) => lines
   .map(
-    ({ coords, color, width }) => `coords:${serializeCoords(coords)},color:${color},width:${width}`,
+    ({
+      coords, color, width, fillcolor,
+    }) => `coords:${serializeCoords(
+      coords,
+    )},color:${color},width:${width},fillcolor:${fillcolor}`,
   )
   .sort()
   .join('|');
@@ -507,6 +511,8 @@ module.exports.parseMarkers = (markers = '') => {
  * Is valid color for path?
  *
  * @param {string} color 32 bit hex color string or color name
+ * @param {string} key Color key used in configuration
+ * @param {string} queryKey Color key used in query configuration
  *
  * @returns {string} color string as 32bit hex number
  *
@@ -514,10 +520,10 @@ module.exports.parseMarkers = (markers = '') => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-const isValidPathColor = (color) => {
+const isValidPathColor = (color, key, queryKey) => {
   // is 32bit hex?
   if (/^[0-9A-F]{8}$/i.test(color)) {
-    return ['color', `#${color.toUpperCase()}`];
+    return [key, `#${color.toUpperCase()}`];
   }
   // default path transparancy
   const transparancy = 'BB';
@@ -534,9 +540,9 @@ const isValidPathColor = (color) => {
     white: `#FFFFFF${transparancy}`,
   };
   if (validColors[color.trim()]) {
-    return ['color', validColors[color.trim()]];
+    return [key, validColors[color.trim()]];
   }
-  throw new Error(`Invalid color configuration "color:${color}"`);
+  throw new Error(`Invalid ${queryKey} configuration "${queryKey}:${color}"`);
 };
 
 /**
@@ -578,9 +584,11 @@ const isValidPathConfig = ([key, value]) => {
 
   switch (key) {
     case 'color':
-      return isValidPathColor(value);
+      return isValidPathColor(value, 'color', key);
     case 'weight':
       return isValidPathWeight(value);
+    case 'fillcolor':
+      return isValidPathColor(value, 'fill', key);
     default:
       throw new Error(`Invalid path configuration "${key}:${value}"`);
   }
@@ -608,10 +616,25 @@ const parsePathConfigs = (configs = []) => {
 
   // set default configurations if not present
   return {
-    color: '#000000BB',
+    color: process.env.PATH_COLOR_DEFAULT,
     width: 5,
     ...data,
   };
+};
+
+/**
+ * Are first and last locations same in the given array?
+ *
+ * @param {array} locations Geo locations coord array
+ *
+ * @returns {boolean} Returns true if they are same, false otherwise
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const areFirstAndLastCoordsSame = (locations = []) => {
+  const first = locations[0];
+  const last = locations[locations.length - 1];
+  return first[0] === last[0] && first[1] === last[1];
 };
 
 /**
@@ -653,6 +676,26 @@ module.exports.parsePath = (line = '') => {
   const configs = parsePathConfigs(
     options.filter((marker) => /:/.test(marker)),
   );
+
+  // has `fillcolor` style set but first and last locations are not same?
+  if (
+    configs.fill
+    && parsedLocations.length > 2
+    && !areFirstAndLastCoordsSame(parsedLocations)
+  ) {
+    // then copy the first location as last location
+    parsedLocations.push(parsedLocations[0]);
+  } else if (
+    configs.fill === undefined
+    && parsedLocations.length > 2
+    && areFirstAndLastCoordsSame(parsedLocations)
+  ) {
+    // add default fill color
+    configs.fill = process.env.POLYGON_FILL_COLOR_DEFAULT;
+  } else if (configs.fill && parsedLocations.length === 2) {
+    // remove fill color
+    delete configs.fill;
+  }
 
   // build final marker configurations
   return {
