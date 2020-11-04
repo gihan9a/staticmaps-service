@@ -24,6 +24,11 @@ jobs:
       IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
       PATH_COLOR_DEFAULT: ${{secrets.PATH_COLOR_DEFAULT}}
       POLYGON_FILL_COLOR_DEFAULT: ${{secrets.POLYGON_FILL_COLOR_DEFAULT}}
+      TEXT_COLOR: ${{secrets.TEXT_COLOR}}
+      TEXT_FILL_COLOR: ${{secrets.TEXT_FILL_COLOR}}
+      TEXT_FONT: ${{secrets.TEXT_FONT}}
+      TEXT_SIZE: ${{secrets.TEXT_SIZE}}
+      TEXT_WIDTH: ${{secrets.TEXT_WIDTH}}
       CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
       CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
     strategy:
