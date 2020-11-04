@@ -188,10 +188,10 @@ const serializeMarkers = (markers = []) => markers
 const serializeLines = (lines = []) => lines
   .map(
     ({
-      coords, color, width, fillcolor,
+      coords, color, width, fill,
     }) => `coords:${serializeCoords(
       coords,
-    )},color:${color},width:${width},fillcolor:${fillcolor}`,
+    )},color:${color},width:${width},fill:${fill}`,
   )
   .sort()
   .join('|');
