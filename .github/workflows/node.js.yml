@@ -13,10 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      IMAGE_WIDTH_DEFAULT: ${{secrets.IMAGE_WIDTH_DEFAULT}}
       IMAGE_WIDTH_MIN: ${{secrets.IMAGE_WIDTH_MIN}}
       IMAGE_WIDTH_MAX: ${{secrets.IMAGE_WIDTH_MAX}}
-      IMAGE_HEIGHT_DEFAULT: ${{secrets.IMAGE_HEIGHT_DEFAULT}}
       IMAGE_HEIGHT_MIN: ${{secrets.IMAGE_HEIGHT_MIN}}
       IMAGE_HEIGHT_MAX: ${{secrets.IMAGE_HEIGHT_MAX}}
       ZOOM_MIN: ${{secrets.ZOOM_MIN}}
