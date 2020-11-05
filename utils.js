@@ -14,21 +14,18 @@ const md5 = require('md5');
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.parseSize = (size = undefined) => {
-  // validate format
-  if (
-    size === undefined
-    || (typeof size === 'string' && size.trim().length === 0)
-  ) {
-    return {
-      width: parseInt(process.env.IMAGE_WIDTH_DEFAULT, 10),
-      height: parseInt(process.env.IMAGE_HEIGHT_DEFAULT, 10),
-    };
+module.exports.parseSize = (size = '') => {
+  // validate size
+  if (typeof size !== 'string') {
+    throw new Error('size should be string type');
   }
   const sizeT = size.trim();
+  if (sizeT === '') {
+    throw new Error('size is required');
+  }
   if (!/^\d+[xX]\d+$/.test(sizeT)) {
     throw new Error(
-      'Invalid size format. Format should be width x height in integers(without spaces). Eg. 600x400',
+      'Invalid size. size should be <width>x<height> in integers. Eg. 600x400',
     );
   }
 
@@ -52,10 +49,7 @@ module.exports.parseSize = (size = undefined) => {
     throw new Error(`Image height should be within ${heightMin}-${heightMax}`);
   }
 
-  return {
-    width,
-    height,
-  };
+  return [width, height];
 };
 
 /**
@@ -70,11 +64,8 @@ module.exports.parseSize = (size = undefined) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.parseGeoCoordinate = (latlon) => {
-  if (
-    latlon === undefined
-    || !/^[ ]*[-]?\d+(\.\d{1,})?,[-]?\d+(\.\d{1,})?[ ]*$/.test(latlon)
-  ) {
+module.exports.parseGeoCoordinate = (latlon = '') => {
+  if (!/^[ ]*[-]?\d+(\.\d{1,})?,[-]?\d+(\.\d{1,})?[ ]*$/.test(latlon)) {
     throw new Error('Invalid geo coordinate format. Eg. -12.445,78.12484');
   }
   const [latitude, longitude] = latlon.trim().split(',');
@@ -96,6 +87,7 @@ module.exports.parseGeoCoordinate = (latlon) => {
  *
  * @param {string} center Latitude and Logitude parameters as a string separate by comma
  * Eg. -12.445,78.12484
+ * @param {array} defaults Default value for center if center parameter is empty
  *
  * @returns {object} Center geo coordinates
  *
@@ -103,7 +95,15 @@ module.exports.parseGeoCoordinate = (latlon) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.parseCenter = (center) => this.parseGeoCoordinate(center);
+module.exports.parseCenter = (center = '', defaults = []) => {
+  if (typeof center !== 'string') {
+    throw new Error('center should be string type');
+  }
+  if (center.trim() === '') {
+    return defaults;
+  }
+  return this.parseGeoCoordinate(center);
+};
 
 /**
  * Parse zoom level of the map
@@ -217,12 +217,13 @@ const serializeTexts = (texts = []) => texts
 /**
  * Generate image name from the map parameters
  *
- * @param {array} center Map center [logitude,latitude]
- * @param {string} mimeExt Image MIME extension
- * @param {object} size Map image width and height
- * @param {number} zoom Map zoom level
- * @param {array} markers Marker objects array
- * @param {array} texts Text marker objects array
+ * @param {object} options Accepts following as options
+ * {array} center Map center [logitude,latitude]
+ * {string} format Image MIME extension
+ * {object} size Map image width and height
+ * {number} zoom Map zoom level
+ * {array} markers Marker objects array
+ * {array} texts Text marker objects array
  *
  * @returns {string} Image name without extension.
  *
@@ -230,7 +231,7 @@ const serializeTexts = (texts = []) => texts
  */
 const getImageName = ({
   center = [],
-  mimeExt,
+  format,
   size,
   zoom,
   markers = [],
@@ -239,7 +240,7 @@ const getImageName = ({
 }) => {
   // validate required options
   const required = {
-    mimeExt,
+    format,
     size,
   };
 
@@ -250,6 +251,18 @@ const getImageName = ({
     }
   }
 
+  const arrays = {
+    center,
+    markers,
+    texts,
+    lines,
+  };
+  Object.keys(arrays).forEach((key) => {
+    if (!Array.isArray(arrays[key])) {
+      throw new Error(`${key} should be a array`);
+    }
+  });
+
   if (
     center.length === 0
     && markers.length === 0
@@ -257,12 +270,12 @@ const getImageName = ({
     && texts.length === 0
   ) {
     throw new Error(
-      'At least center, markers, path or texts parameter is required',
+      'At least center, markers, path or text parameter is required',
     );
   }
 
   // build array using all the parameters
-  const data = `center{${serializeCoords([center])}}mimeExt{${mimeExt}}size{${
+  const data = `center{${serializeCoords([center])}}format{${format}}size{${
     size.width
   },${size.height}}zoom{${zoom}}markers{${serializeMarkers(
     markers,
@@ -294,14 +307,14 @@ const getCacheDirectory = (imageName, create = true) => {
   return dir;
 };
 
-const getImageCachePath = (imageName, basePath, mimeExt = 'jpg') => `${basePath}${path.sep}${imageName}.${mimeExt}`;
+const getImageCachePath = (imageName, basePath, format = 'jpg') => `${basePath}${path.sep}${imageName}.${format}`;
 
 const isCached = (imagePath) => fs.existsSync(imagePath);
 
-module.exports.getImageCacheData = ({ mimeExt, ...rest }) => {
-  const baseName = getImageName({ ...rest, mimeExt });
+module.exports.getImageCacheData = ({ format, ...rest }) => {
+  const baseName = getImageName({ ...rest, format });
   const basePath = getCacheDirectory(baseName);
-  const imagePath = getImageCachePath(baseName, basePath, mimeExt);
+  const imagePath = getImageCachePath(baseName, basePath, format);
 
   return {
     path: imagePath,
@@ -311,7 +324,43 @@ module.exports.getImageCacheData = ({ mimeExt, ...rest }) => {
   };
 };
 
-module.exports.getContentType = (format) => `image/${format}`;
+/**
+ * Validate image format
+ *
+ * @param {string} format Image format
+ *
+ * @returns {string} image format
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+const isValidFormat = (format = '') => {
+  if (typeof format !== 'string') {
+    throw new Error('format should be string type');
+  }
+  const formatLower = format.trim().toLowerCase();
+  const validFormats = ['jpg', 'png', 'webp'];
+  if (!validFormats.includes(formatLower)) {
+    throw new Error(
+      `Invalid format value. format should be one of "${validFormats.join('", "')}"`,
+    );
+  }
+  return formatLower;
+};
+
+/**
+ * Get content type based on the image format
+ *
+ * @param {string} format Image format
+ *
+ * @returns {string} image content type string
+ *
+ * @throws Error if validation fails
+ *
+ * @author Gihan S <gihanshp@gmail.com>
+ */
+module.exports.getContentType = (format = '') => `image/${isValidFormat(format)}`;
 
 /**
  * Parse and validate image format.
@@ -330,23 +379,9 @@ module.exports.parseFormat = (format = '') => {
 
   // if not set send default
   if (format.trim() === '') {
-    return {
-      contentType: this.getContentType(process.env.IMAGE_FORMAT_DEFAULT),
-      extension: process.env.IMAGE_FORMAT_DEFAULT,
-    };
+    return process.env.IMAGE_FORMAT_DEFAULT;
   }
-
-  const formatLower = format.trim().toLowerCase();
-  const validFormats = ['jpg', 'png', 'webp'];
-  if (!validFormats.includes(formatLower)) {
-    throw new Error(
-      'Invalid fomat value. Format should be one of jpg, png, webp',
-    );
-  }
-  return {
-    contentType: this.getContentType(formatLower),
-    extension: formatLower,
-  };
+  return isValidFormat(format);
 };
 
 /**
@@ -511,11 +546,7 @@ const isValidFontSize = (value) => {
  * @author Gihan S <gihanshp@gmail.com>
  */
 const isValidAnchor = (value) => {
-  const valid = [
-    'start',
-    'middle',
-    'end',
-  ];
+  const valid = ['start', 'middle', 'end'];
 
   const val = value.trim().toLowerCase();
   if (!valid.includes(val)) {

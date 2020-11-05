@@ -15,6 +15,12 @@ const {
 } = require('../../utils');
 
 describe('Test utils.js functions', () => {
+  describe('test getContentType function', () => {
+    test('getContentType with invalid arguments', () => {
+      expect(() => { getContentType(); }).toThrow('Invalid format value. format should be one of "jpg", "png", "webp"');
+      expect(() => { getContentType(12); }).toThrow('format should be string type');
+    });
+  });
   // parseSize
   describe('Test parseSize function', () => {
     const widthMax = parseInt(process.env.IMAGE_WIDTH_MAX, 10);
@@ -26,92 +32,48 @@ describe('Test utils.js functions', () => {
     test('test parseSize existance', () => {
       expect(typeof parseSize === 'function').toBe(true);
     });
-    test('parseSize with invalid parameters', () => {
-      expect(() => {
-        parseSize('12');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('12x');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('widthxheight');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize(' 12y45');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('234.4x34');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('234.4x34.62');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('234.434.69');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('234 x 45');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('234 x45');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('-10x20');
-      }).toThrow('Invalid size format.');
-      expect(() => {
-        parseSize('10x-20');
-      }).toThrow('Invalid size format.');
-
-      // Invalid size range
-      expect(() => {
-        parseSize(`${widthMax + 1}x${heightMax + 1}`);
-      }).toThrow('Image width should be within');
-      expect(() => {
-        parseSize(`${widthValid}x${heightMax + 1}`);
-      }).toThrow('Image height should be within');
-      expect(() => {
-        parseSize(`${widthMax + 1}x${heightValid}`);
-      }).toThrow('Image width should be within');
-      expect(() => {
-        parseSize(`${widthMin - 1}x${heightValid}`);
-      }).toThrow('Image width should be within');
-      expect(() => {
-        parseSize(`${widthValid}x${heightMin - 1}`);
-      }).toThrow('Image height should be within');
-      expect(() => {
-        parseSize(`${widthMin - 1}X${heightMin - 1}`);
-      }).toThrow('Image width should be within');
+    const parseSizeError0 = 'size is required';
+    const parseSizeError1 = 'Invalid size. size should be <width>x<height> in integers. Eg. 600x400';
+    const parseSizeError2 = `Image width should be within ${widthMin}-${widthMax}`;
+    const parseSizeError3 = `Image height should be within ${heightMin}-${heightMax}`;
+    test.each([
+      [undefined, parseSizeError0],
+      ['', parseSizeError0],
+      [' ', parseSizeError0],
+      ['12', parseSizeError1],
+      ['12x', parseSizeError1],
+      ['widthxheight', parseSizeError1],
+      [' 12y45', parseSizeError1],
+      ['234.4x34', parseSizeError1],
+      ['234.4x34.62', parseSizeError1],
+      ['234.434.69', parseSizeError1],
+      ['234 x 45', parseSizeError1],
+      ['234 x45', parseSizeError1],
+      ['-10x20', parseSizeError1],
+      ['10x-20', parseSizeError1],
+      [`${widthMax + 1}x${heightMax + 1}`, parseSizeError2],
+      [`${widthValid}x${heightMax + 1}`, parseSizeError3],
+      [`${widthMax + 1}x${heightValid}`, parseSizeError2],
+      [`${widthValid}x${heightMin - 1}`, parseSizeError3],
+      [`${widthMin - 1}X${heightMin - 1}`, parseSizeError2],
+      [12, 'size should be string type'],
+    ])('invalid arguments for parseSize(%s)', (input, expcted) => {
+      expect(() => { parseSize(input); }).toThrow(expcted);
     });
 
-    test('parseSize with valid parameters', () => {
-      expect(parseSize(`${widthMin}x${heightMin}`)).toStrictEqual({
-        width: widthMin,
-        height: heightMin,
-      });
-      expect(parseSize(`${widthMax}X${heightMax}`)).toStrictEqual({
-        width: widthMax,
-        height: heightMax,
-      });
-      expect(parseSize(` ${widthMax}X${heightMax}    `)).toStrictEqual({
-        width: widthMax,
-        height: heightMax,
-      });
-      // empty value should use default configured image size
-      expect(parseSize('')).toStrictEqual({
-        width: parseInt(process.env.IMAGE_WIDTH_DEFAULT, 10),
-        height: parseInt(process.env.IMAGE_HEIGHT_DEFAULT, 10),
-      });
-      expect(parseSize()).toStrictEqual({
-        width: parseInt(process.env.IMAGE_WIDTH_DEFAULT, 10),
-        height: parseInt(process.env.IMAGE_HEIGHT_DEFAULT, 10),
-      });
+    test('parseSize with valid arguments', () => {
+      expect(parseSize(`${widthMin}x${heightMin}`)).toStrictEqual([widthMin, heightMin]);
+      expect(parseSize(`${widthMax}X${heightMax}`)).toStrictEqual([widthMax, heightMax]);
+      expect(parseSize(` ${widthMax}X${heightMax}    `)).toStrictEqual([widthMax, heightMax]);
     });
   });
+
   // parseGeoCoordinate
   describe('test parseGeoCoordinate function', () => {
     test('test parseGeoCoordinate existance', () => {
       expect(typeof parseGeoCoordinate === 'function').toBe(true);
     });
-    test('test parseGeoCoordinate with invalid parameters', () => {
+    test('test parseGeoCoordinate with invalid arguments', () => {
       // invalid format
       expect(() => {
         parseGeoCoordinate();
@@ -158,7 +120,7 @@ describe('Test utils.js functions', () => {
         parseGeoCoordinate('-9.2344,191.234');
       }).toThrow('Longitude should be within -180 and 180');
     });
-    test('test parseGeoCoordinate with valid parameters', () => {
+    test('test parseGeoCoordinate with valid arguments', () => {
       expect(parseGeoCoordinate('-12.445,78.12484')).toStrictEqual([
         78.12484,
         -12.445,
@@ -172,8 +134,35 @@ describe('Test utils.js functions', () => {
   // parseCenter
   describe('test parseCenter function', () => {
     // parseCenter is exactly same as parseGeoCoordinate
-    test('test parseCenter existance', () => {
-      expect(typeof parseCenter === 'function').toBe(true);
+    test('test parseCenter with invalid arguments', () => {
+      expect(() => {
+        parseCenter(10);
+      }).toThrow('center should be string type');
+      expect(() => {
+        parseCenter('10');
+      }).toThrow('Invalid geo coordinate format. Eg. -12.445,78.12484');
+      expect(() => {
+        parseCenter('10|15');
+      }).toThrow('Invalid geo coordinate format. Eg. -12.445,78.12484');
+      expect(() => {
+        parseCenter('100,190');
+      }).toThrow('Latitude should be within -90 and 90');
+      expect(() => {
+        parseCenter('10,190');
+      }).toThrow('Longitude should be within -180 and 180');
+    });
+    test('test parseCenter with valid arguments', () => {
+      expect(parseCenter()).toStrictEqual([]);
+      expect(parseCenter('')).toStrictEqual([]);
+      expect(parseCenter(' ')).toStrictEqual([]);
+      expect(parseCenter('62.107733,-145.541936')).toStrictEqual([
+        -145.541936,
+        62.107733,
+      ]);
+      expect(parseCenter('', [-145.541936, 62.107733])).toStrictEqual([
+        -145.541936,
+        62.107733,
+      ]);
     });
   });
 
@@ -185,7 +174,7 @@ describe('Test utils.js functions', () => {
     const zoomMin = parseInt(ZOOM_MIN, 10);
     const zoomMax = parseInt(ZOOM_MAX, 10);
     const zoomValid = random(zoomMin, zoomMax);
-    test('test parseZoom with invalid parameters', () => {
+    test('test parseZoom with invalid arguments', () => {
       // type test
       expect(() => {
         parseZoom(zoomValid);
@@ -218,13 +207,13 @@ describe('Test utils.js functions', () => {
         parseZoom(`${zoomMin + 0.12}`);
       }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
     });
-    test('test parseZoom with valid parameters', () => {
+    test('test parseZoom with valid arguments', () => {
       expect(parseZoom(`${zoomValid}`)).toBe(zoomValid);
     });
   });
 
   const mapParameters1 = {
-    mimeExt: 'jpg',
+    format: 'jpg',
     center: [13.437524, 52.4945528],
     size: { width: 600, height: 400 },
     zoom: 10,
@@ -268,7 +257,11 @@ describe('Test utils.js functions', () => {
     ],
     lines: [
       {
-        coords: [[13.437524, 52.4945528], [14.437524, 52.4945528], [15.437524, 53.4945528]],
+        coords: [
+          [13.437524, 52.4945528],
+          [14.437524, 52.4945528],
+          [15.437524, 53.4945528],
+        ],
         color: '#ffffffff',
         width: 1,
         fill: '#00000088',
@@ -277,7 +270,7 @@ describe('Test utils.js functions', () => {
   };
   // mapParameters2 is same as mapParameters1, just the order of properties are not same
   const mapParameters2 = {
-    mimeExt: 'jpg',
+    format: 'jpg',
     center: [13.437524, 52.4945528],
     size: { height: 400, width: 600 },
     zoom: 10,
@@ -321,7 +314,11 @@ describe('Test utils.js functions', () => {
     ],
     lines: [
       {
-        coords: [[13.437524, 52.4945528], [14.437524, 52.4945528], [15.437524, 53.4945528]],
+        coords: [
+          [13.437524, 52.4945528],
+          [14.437524, 52.4945528],
+          [15.437524, 53.4945528],
+        ],
         fill: '#00000088',
         width: 1,
         color: '#ffffffff',
@@ -334,14 +331,50 @@ describe('Test utils.js functions', () => {
     test('test getImageCacheData with invalid arguments', () => {
       expect(() => {
         getImageCacheData({});
-      }).toThrow('mimeExt is required');
+      }).toThrow('format is required');
       expect(() => {
-        getImageCacheData({ mimeExt: 'jpg' });
+        getImageCacheData({ format: 'jpg' });
       }).toThrow('size is required');
       expect(() => {
-        getImageCacheData({ mimeExt: 'jpg', size: '100x200' });
+        getImageCacheData({ format: 'jpg', size: '100x200' });
       }).toThrow(
-        'At least center, markers, path or texts parameter is required',
+        'At least center, markers, path or text parameter is required',
+      );
+      expect(() => {
+        getImageCacheData({ format: 'jpg', size: '100x200', markers: null });
+      }).toThrow('markers should be a array');
+      expect(() => {
+        getImageCacheData({
+          format: 'jpg',
+          size: '100x200',
+          markers: undefined,
+        });
+      }).toThrow(
+        'At least center, markers, path or text parameter is required',
+      );
+      expect(() => {
+        getImageCacheData({ format: 'jpg', size: '100x200', texts: null });
+      }).toThrow('texts should be a array');
+      expect(() => {
+        getImageCacheData({
+          format: 'jpg',
+          size: '100x200',
+          texts: undefined,
+        });
+      }).toThrow(
+        'At least center, markers, path or text parameter is required',
+      );
+      expect(() => {
+        getImageCacheData({ format: 'jpg', size: '100x200', lines: null });
+      }).toThrow('lines should be a array');
+      expect(() => {
+        getImageCacheData({
+          format: 'jpg',
+          size: '100x200',
+          lines: undefined,
+        });
+      }).toThrow(
+        'At least center, markers, path or text parameter is required',
       );
     });
     test('test getImageName', () => {
@@ -364,42 +397,30 @@ describe('Test utils.js functions', () => {
 
   // parseFormat function
   describe('test parseFormat function', () => {
-    test('test parseFormat with invalid parameters', () => {
+    test('test parseFormat with invalid arguments', () => {
       expect(() => {
         parseFormat('jpt');
-      }).toThrow('Invalid fomat value. Format should be one of jpg, png, webp');
+      }).toThrow('Invalid format value. format should be one of "jpg", "png", "webp"');
       expect(() => {
         parseFormat(1);
       }).toThrow('format type should be string');
       expect(() => {
         parseFormat('gif');
-      }).toThrow('Invalid fomat value. Format should be one of jpg, png, webp');
+      }).toThrow('Invalid format value. format should be one of "jpg", "png", "webp"');
     });
 
     // test with valid
-    test('test parseFormat with valid parameters', () => {
-      expect(parseFormat()).toStrictEqual({
-        contentType: getContentType(process.env.IMAGE_FORMAT_DEFAULT),
-        extension: process.env.IMAGE_FORMAT_DEFAULT,
-      });
-      expect(parseFormat('jpg')).toStrictEqual({
-        contentType: 'image/jpg',
-        extension: 'jpg',
-      });
-      expect(parseFormat('png')).toStrictEqual({
-        contentType: 'image/png',
-        extension: 'png',
-      });
-      expect(parseFormat('webp')).toStrictEqual({
-        contentType: 'image/webp',
-        extension: 'webp',
-      });
+    test('test parseFormat with valid arguments', () => {
+      expect(parseFormat()).toStrictEqual(process.env.IMAGE_FORMAT_DEFAULT);
+      expect(parseFormat('jpg')).toStrictEqual('jpg');
+      expect(parseFormat('png')).toStrictEqual('png');
+      expect(parseFormat('webp')).toStrictEqual('webp');
     });
   });
 
   // test parseMarkers function
   describe('test parseMarkers function', () => {
-    test('test markersFunction with invalid parameters', () => {
+    test('test markersFunction with invalid arguments', () => {
       expect(() => {
         parseMarkers(null);
       }).toThrow('Markers should be string type');
@@ -463,7 +484,7 @@ describe('Test utils.js functions', () => {
         parseMarkers('color:none|62.107733,-145.541936');
       }).toThrow('Invalid color configuration "color:none"');
     });
-    test('test markersFunction with valid parameters', () => {
+    test('test markersFunction with valid arguments', () => {
       expect(parseMarkers(undefined)).toStrictEqual([]);
       const markerColorDefault = process.env.MARKER_COLOR_DEFAULT;
       expect(parseMarkers('62.107733,-145.541936')).toStrictEqual([
@@ -490,7 +511,7 @@ describe('Test utils.js functions', () => {
 
   // test parsePath
   describe('test parsePath function', () => {
-    test('test parsePath with invalid parameters', () => {
+    test('test parsePath with invalid arguments', () => {
       expect(() => {
         parsePath(1);
       }).toThrow('path should be string type');
@@ -562,7 +583,7 @@ describe('Test utils.js functions', () => {
       }).toThrow('There must be two or more locations to draw a path');
       // @tood test weight boundary values
     });
-    test('test parsePath with valid parameters', () => {
+    test('test parsePath with valid arguments', () => {
       expect(parsePath()).toStrictEqual(null);
       expect(parsePath('')).toStrictEqual(null);
       expect(parsePath(' ')).toStrictEqual(null);

@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const fs = require('fs');
+const { parse } = require('path');
 const fastify = require('fastify')({
   logger: true,
 });
@@ -16,40 +17,67 @@ const {
   parseFormat,
   parseMarkers,
   parsePath,
+  parseText,
+  getContentType,
 } = require('./utils');
+
+const parseArguments = (query) => {
+  const size = parseSize(query.size);
+  const zoom = query.zoom && parseZoom(query.zoom);
+  const format = parseFormat(query.format);
+  const markers = parseMarkers(query.markers);
+  const line = parsePath(query.path);
+  const text = parseText(query.text);
+  const center = parseCenter(query.center, text ? text.coord : []);
+  return {
+    size,
+    zoom,
+    format,
+    markers,
+    lines: line ? [line] : [],
+    texts: text ? [text] : [],
+    center,
+  };
+};
+
+const getMapInstance = ({
+  size, markers, lines, texts,
+}) => {
+  const map = new StaticMaps({
+    width: size[0],
+    height: size[1],
+  });
+
+  // markers?
+  if (markers.length > 0) {
+    markers.forEach((marker) => {
+      map.addMarker(marker);
+    });
+  }
+
+  // path
+  if (lines.length > 0) {
+    lines.forEach((line) => {
+      map.addLine(line);
+    });
+  }
+
+  // texts
+  if (texts.length > 0) {
+    texts.forEach((text) => {
+      map.addText(text);
+    });
+  }
+  return map;
+};
 
 fastify.get('/', async (request, reply) => {
   try {
-    // is center query not provided?
-    if (
-      request.query.center === undefined
-      && request.query.markers === undefined
-      && request.query.path === undefined
-      && request.query.texts === undefined
-    ) {
-      throw new Error(
-        'At least center, markers, path or texts parameter is required',
-      );
-    }
     // parse and validate query parameters
-    let center = [];
-    if (request.query.center) {
-      center = parseCenter(request.query.center);
-    }
-    const { width, height } = parseSize(request.query.size);
-    const zoom = request.query.zoom && parseZoom(request.query.zoom);
-    const { contentType, extension } = parseFormat(request.query.format);
-    const markers = parseMarkers(request.query.markers);
-    const lines = parsePath(request.query.path);
-
-    const { isCached, path: imagePath } = getImageCacheData({
-      center,
-      size: { width, height },
-      mimeExt: extension,
-      zoom,
-      markers,
-      lines: [lines],
-    });
+    const params = parseArguments(request.query);
+    const { isCached, path: imagePath } = getImageCacheData(params);
+    const { zoom, format, center } = params;
+    const contentType = getContentType(format);
 
     // is there a cached copy?
     if (isCached) {
@@ -60,23 +88,7 @@ fastify.get('/', async (request, reply) => {
     }
 
     // create new StaticMap instance
-    const map = new StaticMaps({
-      width,
-      height,
-    });
-
-    // markers?
-    if (markers.length > 0) {
-      markers.forEach((marker) => {
-        map.addMarker(marker);
-      });
-    }
-
-    // path
-    if (lines) {
-      map.addLine(lines);
-    }
-
+    const map = getMapInstance(params);
     // render new image
     const buffer = await map
       .render(center.length > 0 ? center : undefined, zoom)
