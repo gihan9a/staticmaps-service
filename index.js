@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const fs = require('fs');
-const { parse } = require('path');
 const fastify = require('fastify')({
   logger: true,
 });
