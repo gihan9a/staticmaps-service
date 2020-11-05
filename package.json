@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon --config ./nodemon.json index.js",
+    "cache:clear": "node scripts/cache",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cover": "jest --coverage"
@@ -27,6 +28,7 @@
   "homepage": "https://github.com/gihan10/staticmap-service#readme",
   "dependencies": {
     "between-range": "^1.0.0",
+    "del": "^6.0.0",
     "dotenv": "^8.2.0",
     "fastify": "^3.7.0",
     "fastify-favicon": "^3.0.0",
