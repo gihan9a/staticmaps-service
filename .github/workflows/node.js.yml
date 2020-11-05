@@ -13,13 +13,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      IMAGE_WIDTH_MIN: ${{secrets.IMAGE_WIDTH_MIN}}
-      IMAGE_WIDTH_MAX: ${{secrets.IMAGE_WIDTH_MAX}}
-      IMAGE_HEIGHT_MIN: ${{secrets.IMAGE_HEIGHT_MIN}}
-      IMAGE_HEIGHT_MAX: ${{secrets.IMAGE_HEIGHT_MAX}}
-      ZOOM_MIN: ${{secrets.ZOOM_MIN}}
-      ZOOM_MAX: ${{secrets.ZOOM_MAX}}
+      CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
+      CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
       IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
+      IMAGE_HEIGHT_MAX: ${{secrets.IMAGE_HEIGHT_MAX}}
+      IMAGE_HEIGHT_MIN: ${{secrets.IMAGE_HEIGHT_MIN}}
+      IMAGE_WIDTH_MAX: ${{secrets.IMAGE_WIDTH_MAX}}
+      IMAGE_WIDTH_MIN: ${{secrets.IMAGE_WIDTH_MIN}}
+      MARKER_COLOR_DEFAULT: ${{secrets.MARKER_COLOR_DEFAULT}}
       PATH_COLOR_DEFAULT: ${{secrets.PATH_COLOR_DEFAULT}}
       POLYGON_FILL_COLOR_DEFAULT: ${{secrets.POLYGON_FILL_COLOR_DEFAULT}}
       TEXT_COLOR: ${{secrets.TEXT_COLOR}}
@@ -27,8 +28,8 @@ jobs:
       TEXT_FONT: ${{secrets.TEXT_FONT}}
       TEXT_SIZE: ${{secrets.TEXT_SIZE}}
       TEXT_WIDTH: ${{secrets.TEXT_WIDTH}}
-      CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
-      CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
+      ZOOM_MAX: ${{secrets.ZOOM_MAX}}
+      ZOOM_MIN: ${{secrets.ZOOM_MIN}}
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
