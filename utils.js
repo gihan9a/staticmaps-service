@@ -116,10 +116,14 @@ module.exports.parseCenter = (center = '', defaults = []) => {
  *
  * @author Gihan S <gihanshp@gmail.com>
  */
-module.exports.parseZoom = (level = undefined) => {
+module.exports.parseZoom = (level = '') => {
   // is invalid?
   if (typeof level !== 'string') {
     throw new Error('zoom parameter should be string type');
+  }
+
+  if (level.trim() === '') {
+    return undefined;
   }
 
   if (!/^\d+$/.test(level.trim())) {

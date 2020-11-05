@@ -180,15 +180,6 @@ describe('Test utils.js functions', () => {
         parseZoom(zoomValid);
       }).toThrow('zoom parameter should be string type');
       expect(() => {
-        parseZoom();
-      }).toThrow('zoom parameter should be string type');
-      expect(() => {
-        parseZoom('');
-      }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
-      expect(() => {
-        parseZoom(' ');
-      }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
-      expect(() => {
         parseZoom('abc');
       }).toThrow('Invalid zoom value. zoom value should be a integer eg. 10');
 
@@ -209,6 +200,9 @@ describe('Test utils.js functions', () => {
     });
     test('test parseZoom with valid arguments', () => {
       expect(parseZoom(`${zoomValid}`)).toBe(zoomValid);
+      expect(parseZoom()).toBe(undefined);
+      expect(parseZoom('')).toBe(undefined);
+      expect(parseZoom(' ')).toBe(undefined);
     });
   });
 

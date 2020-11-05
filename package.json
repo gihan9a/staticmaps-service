@@ -4,12 +4,13 @@
   "description": "Generate static map images as a service",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .",
     "start": "node index.js",
     "dev": "nodemon --config ./nodemon.json index.js",
     "cache:clear": "node scripts/cache",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cover": "jest --coverage"
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:cover": "NODE_ENV=test jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -35,7 +36,8 @@
     "lodash": "^4.17.20",
     "md5": "^2.3.0",
     "nodemon": "^2.0.6",
-    "staticmaps": "^1.4.2"
+    "staticmaps": "^1.4.2",
+    "supertest": "^6.0.1"
   },
   "devDependencies": {
     "eslint": "^7.12.1",
