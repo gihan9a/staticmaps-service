@@ -12,11 +12,11 @@ afterEach(() => {
 });
 
 describe('Going to test app', () => {
-  test('smoke test', async () => {
+  test('Smoke test', async () => {
     const request = supertest(app.server);
-    const res = await request.get('/').expect(400);
-    expect(res.status).toBe(400);
-    expect(res.body).toStrictEqual({ data: 'error', error: 'size is required' });
+    const res = await request.get('/');
+    expect(res.status).toBe(200);
+    expect(res.body).toStrictEqual({ data: 'Hello world' });
   });
   test('Required parameter is missing', async () => {
     const request = supertest(app.server);
@@ -109,7 +109,7 @@ describe('Going to test app', () => {
     expect(res.headers['content-type']).toBe('image/jpg');
   });
 
-  // Skip following tests on CI environments because fonts are not available
+  // Skip running following tests on CI environments because fonts are not available
   if (process.env.ENV === 'dev') {
     test('Map with simple text', async () => {
       const request = supertest(app.server);

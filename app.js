@@ -70,6 +70,14 @@ module.exports = function build(options = {}) {
   const app = fastify(options);
   app.get('/', async (request, reply) => {
     try {
+      // if query is empty send nice message
+      if (Object.keys(request.query).length === 0) {
+        reply.type('application/json').code(200);
+        return {
+          data: 'Hello world',
+        };
+      }
+
       // parse and validate query parameters
       const params = parseArguments(request.query);
       const { isCached, path: imagePath } = getImageCacheData(params);
