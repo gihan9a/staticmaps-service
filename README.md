@@ -19,15 +19,17 @@ Building out of the box product for generating static map images as a web servic
 
 ## Code style
 
-This project follows `Airbnb` javascript style guide.
+This project follows `Airbnb` javascript style guide and enforced by "Eslint". Run `npm run lint` to validate style adhearance.
 
 [![js-standard-style](https://img.shields.io/badge/code%20style-airbnb-brightgreen)](https://github.com/airbnb/javascript)
 
 ## Screenshots
 
-Images can be generated as follows using URL parameters
+Images can be generated using URL parameters as follows.
 
 `<your baseurl>?markers=40.714728,-73.998672|63.259591,-144.667969&size=200x200`
+
+The above url will generate blow image.  
 
 ![Screenshot](https://github.com/gihan9a/staticmaps-service/blob/main/.github/multiple-markers-200.jpeg?raw=true)
 
@@ -40,7 +42,7 @@ Images can be generated as follows using URL parameters
 
 ## Features
 
-Following can be draw on a map using this API service thanks to [StaticMaps](https://www.npmjs.com/package/staticmaps).
+Following features can be draw on a map using this API service.
 
 - Markers
 - Paths
@@ -94,12 +96,12 @@ You can install this API as a docker image or as a bare Node.js web service
 
 ### Volumes
 
-`/cache` directory can be mounted to persist image caches
+`/cache` directory can be mounted as a volume to persist image caches
 
 
 ## Tests
 
-Tests can be found in `/test` directory. Tests can be run using `npm test`.
+Tests can be found in `/test` directory. Tests can be run using `npm test`. Please make sure you have working internet connection when running integration tests.
 
 ## How to use?
 
@@ -122,6 +124,6 @@ Map images and data provide by [Openstreetmap.org](https://www.openstreetmap.org
 This work is licensed under the terms of the MIT license.  
 For a copy, see <https://opensource.org/licenses/MIT>.
 
-The map samples are from © OpenStreetMap contributors
+Map images are provided by © OpenStreetMap contributors
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service?ref=badge_large)
