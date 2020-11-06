@@ -98,8 +98,10 @@ module.exports = function build(options = {}) {
     } catch (err) {
       // logo error
       if (process.env.NODE_ENV !== 'test') {
-        // eslint-disable-next-line no-console
-        console.log(err);
+        if (err.name === 'Error') {
+          // eslint-disable-next-line no-console
+          console.log(err);
+        }
       }
 
       // respond error

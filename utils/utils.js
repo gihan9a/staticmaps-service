@@ -3,6 +3,8 @@ const path = require('path');
 const { inRange } = require('lodash');
 const md5 = require('md5');
 
+const ValidationError = require('./ValidationError');
+
 /**
  * Parse size query parameter
  *
@@ -17,14 +19,14 @@ const md5 = require('md5');
 module.exports.parseSize = (size = '') => {
   // validate size
   if (typeof size !== 'string') {
-    throw new Error('size should be string type');
+    throw new ValidationError('size should be string type');
   }
   const sizeT = size.trim();
   if (sizeT === '') {
-    throw new Error('size is required');
+    throw new ValidationError('size is required');
   }
   if (!/^\d+[xX]\d+$/.test(sizeT)) {
-    throw new Error(
+    throw new ValidationError(
       'Invalid size. size should be <width>x<height> in integers. Eg. 600x400',
     );
   }
@@ -40,13 +42,17 @@ module.exports.parseSize = (size = '') => {
   const widthMax = parseInt(process.env.IMAGE_WIDTH_MAX, 10);
   // is image width within valid range?
   if (!inRange(width, widthMin, widthMax + 1)) {
-    throw new Error(`Image width should be within ${widthMin}-${widthMax}`);
+    throw new ValidationError(
+      `Image width should be within ${widthMin}-${widthMax}`,
+    );
   }
   const heightMin = parseInt(process.env.IMAGE_HEIGHT_MIN, 10);
   const heightMax = parseInt(process.env.IMAGE_HEIGHT_MAX, 10);
   // is image height within valid range?
   if (!inRange(height, heightMin, heightMax + 1)) {
-    throw new Error(`Image height should be within ${heightMin}-${heightMax}`);
+    throw new ValidationError(
+      `Image height should be within ${heightMin}-${heightMax}`,
+    );
   }
 
   return [width, height];
@@ -66,17 +72,19 @@ module.exports.parseSize = (size = '') => {
  */
 module.exports.parseGeoCoordinate = (latlon = '') => {
   if (!/^[ ]*[-]?\d+(\.\d{1,})?,[-]?\d+(\.\d{1,})?[ ]*$/.test(latlon)) {
-    throw new Error('Invalid geo coordinate format. Eg. -12.445,78.12484');
+    throw new ValidationError(
+      'Invalid geo coordinate format. Eg. -12.445,78.12484',
+    );
   }
   const [latitude, longitude] = latlon.trim().split(',');
 
   // is latitude within the range?
   if (!inRange(latitude, -90, 90 + 1)) {
-    throw new Error('Latitude should be within -90 and 90');
+    throw new ValidationError('Latitude should be within -90 and 90');
   }
   // is logitude within the range?
   if (!inRange(longitude, -180, 180 + 1)) {
-    throw new Error('Longitude should be within -180 and 180');
+    throw new ValidationError('Longitude should be within -180 and 180');
   }
 
   return [parseFloat(longitude), parseFloat(latitude)];
@@ -97,7 +105,7 @@ module.exports.parseGeoCoordinate = (latlon = '') => {
  */
 module.exports.parseCenter = (center = '', defaults = []) => {
   if (typeof center !== 'string') {
-    throw new Error('center should be string type');
+    throw new ValidationError('center should be string type');
   }
   if (center.trim() === '') {
     return defaults;
@@ -119,7 +127,7 @@ module.exports.parseCenter = (center = '', defaults = []) => {
 module.exports.parseZoom = (level = '') => {
   // is invalid?
   if (typeof level !== 'string') {
-    throw new Error('zoom parameter should be string type');
+    throw new ValidationError('zoom parameter should be string type');
   }
 
   if (level.trim() === '') {
@@ -127,7 +135,7 @@ module.exports.parseZoom = (level = '') => {
   }
 
   if (!/^\d+$/.test(level.trim())) {
-    throw new Error(
+    throw new ValidationError(
       'Invalid zoom value. zoom value should be a integer eg. 10',
     );
   }
@@ -138,7 +146,7 @@ module.exports.parseZoom = (level = '') => {
 
   // is not within the range?
   if (!inRange(levelValidated, zoomMin, zoomMax + 1)) {
-    throw new Error(
+    throw new ValidationError(
       `Invalid zoom value. zoom should be within ${zoomMin}-${zoomMax}`,
     );
   }
@@ -251,7 +259,7 @@ const getImageName = ({
   const keys = Object.keys(required);
   for (let i = 0; i < keys.length; i += 1) {
     if (required[keys[i]] === undefined) {
-      throw new Error(`${keys[i]} is required`);
+      throw new ValidationError(`${keys[i]} is required`);
     }
   }
 
@@ -263,7 +271,7 @@ const getImageName = ({
   };
   Object.keys(arrays).forEach((key) => {
     if (!Array.isArray(arrays[key])) {
-      throw new Error(`${key} should be a array`);
+      throw new ValidationError(`${key} should be a array`);
     }
   });
 
@@ -273,7 +281,7 @@ const getImageName = ({
     && lines.length === 0
     && texts.length === 0
   ) {
-    throw new Error(
+    throw new ValidationError(
       'At least center, markers, path or text parameter is required',
     );
   }
@@ -341,13 +349,15 @@ module.exports.getImageCacheData = ({ format, ...rest }) => {
  */
 const isValidFormat = (format = '') => {
   if (typeof format !== 'string') {
-    throw new Error('format should be string type');
+    throw new ValidationError('format should be string type');
   }
   const formatLower = format.trim().toLowerCase();
   const validFormats = ['jpg', 'png', 'webp'];
   if (!validFormats.includes(formatLower)) {
-    throw new Error(
-      `Invalid format value. format should be one of "${validFormats.join('", "')}"`,
+    throw new ValidationError(
+      `Invalid format value. format should be one of "${validFormats.join(
+        '", "',
+      )}"`,
     );
   }
   return formatLower;
@@ -378,7 +388,7 @@ module.exports.getContentType = (format = '') => `image/${isValidFormat(format)}
  */
 module.exports.parseFormat = (format = '') => {
   if (typeof format !== 'string') {
-    throw new Error('format type should be string');
+    throw new ValidationError('format type should be string');
   }
 
   // if not set send default
@@ -434,7 +444,7 @@ const colorHexMap = (value, swap = false) => {
     }
   }
 
-  throw new Error('Unsupported color');
+  throw new ValidationError('Unsupported color');
 };
 
 /**
@@ -477,7 +487,9 @@ const isValidColor = (color, key, queryKey) => {
   try {
     return [key, colorHexMap(color.trim(), true)];
   } catch (err) {
-    throw new Error(`Invalid ${queryKey} configuration "${queryKey}:${color}"`);
+    throw new ValidationError(
+      `Invalid ${queryKey} configuration "${queryKey}:${color}"`,
+    );
   }
 };
 
@@ -494,7 +506,7 @@ const isValidColor = (color, key, queryKey) => {
  */
 const isValidWeight = (weight) => {
   if (!/^[0-9]*$/.test(weight)) {
-    throw new Error(
+    throw new ValidationError(
       `Invalid weight configuration "weight:${weight}". Should be integer type eg. 4`,
     );
   }
@@ -515,7 +527,7 @@ const isValidWeight = (weight) => {
 const isValidFont = (value) => {
   const valid = ['Arial', 'Times New Roman', 'Courier New'];
   if (!valid.includes(value.trim())) {
-    throw new Error(`Invalid font configuration "font:${value}"`);
+    throw new ValidationError(`Invalid font configuration "font:${value}"`);
   }
   return ['font', value.trim()];
 };
@@ -533,7 +545,9 @@ const isValidFont = (value) => {
  */
 const isValidFontSize = (value) => {
   if (!/^[0-9]*$/.test(value.trim())) {
-    throw new Error(`Invalid fontsize configuration "fontsize:${value}"`);
+    throw new ValidationError(
+      `Invalid fontsize configuration "fontsize:${value}"`,
+    );
   }
   return ['size', parseInt(value.trim(), 10)];
 };
@@ -554,7 +568,7 @@ const isValidAnchor = (value) => {
 
   const val = value.trim().toLowerCase();
   if (!valid.includes(val)) {
-    throw new Error(`Invalid anchor configuration "anchor:${value}"`);
+    throw new ValidationError(`Invalid anchor configuration "anchor:${value}"`);
   }
 
   return ['anchor', val];
@@ -576,7 +590,9 @@ const isValidAnchor = (value) => {
 const isValidTextValue = (value, key, queryKey) => {
   const val = value.trim();
   if (!/^[\w\s-]*$/.test(value)) {
-    throw new Error(`Invalid ${queryKey} configuration "${queryKey}:${value}"`);
+    throw new ValidationError(
+      `Invalid ${queryKey} configuration "${queryKey}:${value}"`,
+    );
   }
 
   return [key, val];
@@ -597,7 +613,9 @@ const isValidTextValue = (value, key, queryKey) => {
 const isValidConfig = (type, [key, value]) => {
   // basic validate of key and value
   if (!key || !value) {
-    throw new Error(`Invalid ${type} configuration "${key}:${value}"`);
+    throw new ValidationError(
+      `Invalid ${type} configuration "${key}:${value}"`,
+    );
   }
 
   switch (key) {
@@ -621,7 +639,9 @@ const isValidConfig = (type, [key, value]) => {
     case 'anchor':
       return isValidAnchor(value, 'anchor', key);
     default:
-      throw new Error(`Invalid ${type} configuration "${key}:${value}"`);
+      throw new ValidationError(
+        `Invalid ${type} configuration "${key}:${value}"`,
+      );
   }
 };
 
@@ -668,11 +688,13 @@ const parseLocations = (locations) => locations.map((location) => {
     return this.parseGeoCoordinate(location);
   } catch (err) {
     if (/^Invalid geo coordinate format/.test(err.message)) {
-      throw new Error(
+      throw new ValidationError(
         `Invalid location found "${location}". Eg. -12.445,78.12484`,
       );
     }
-    throw new Error(`Invalid location found "${location}". ${err.message}`);
+    throw new ValidationError(
+      `Invalid location found "${location}". ${err.message}`,
+    );
   }
 });
 
@@ -690,7 +712,7 @@ const parseLocations = (locations) => locations.map((location) => {
 module.exports.parseMarkers = (markers = '') => {
   // is not string?
   if (typeof markers !== 'string') {
-    throw new Error('Markers should be string type');
+    throw new ValidationError('Markers should be string type');
   }
 
   // is empty?
@@ -702,13 +724,15 @@ module.exports.parseMarkers = (markers = '') => {
   const options = markers.trim().split('|');
   const locations = options.filter((marker) => /,/.test(marker));
   if (locations.length === 0) {
-    throw new Error('No marker locations found');
+    throw new ValidationError('No marker locations found');
   }
 
   // validate geo locations
   const parsedLocations = parseLocations(locations);
   // default marker icon
-  const [, imgDefault] = getMarkerIcon(colorHexMap(process.env.MARKER_COLOR_DEFAULT, true));
+  const [, imgDefault] = getMarkerIcon(
+    colorHexMap(process.env.MARKER_COLOR_DEFAULT, true),
+  );
 
   // parse marker configurations
   const configs = parseConfigs(
@@ -757,7 +781,7 @@ const areFirstAndLastCoordsSame = (locations = []) => {
 module.exports.parsePath = (line = '') => {
   // is not string?
   if (typeof line !== 'string') {
-    throw new Error('path should be string type');
+    throw new ValidationError('path should be string type');
   }
 
   // is empty?
@@ -769,13 +793,15 @@ module.exports.parsePath = (line = '') => {
   const options = line.trim().split('|');
   const locations = options.filter((option) => /,/.test(option));
   if (locations.length === 0) {
-    throw new Error('No path locations found');
+    throw new ValidationError('No path locations found');
   }
 
   // validate geo locations
   const parsedLocations = parseLocations(locations);
   if (parsedLocations.length < 2) {
-    throw new Error('There must be two or more locations to draw a path');
+    throw new ValidationError(
+      'There must be two or more locations to draw a path',
+    );
   }
 
   // parse path configurations
@@ -823,7 +849,7 @@ module.exports.parsePath = (line = '') => {
 module.exports.parseText = (texts = '') => {
   // is not string?
   if (typeof texts !== 'string') {
-    throw new Error('text should be string type');
+    throw new ValidationError('text should be string type');
   }
 
   // is empty?
@@ -835,13 +861,13 @@ module.exports.parseText = (texts = '') => {
   const options = texts.trim().split('|');
   const locations = options.filter((option) => /,/.test(option));
   if (locations.length === 0) {
-    throw new Error('No text location found');
+    throw new ValidationError('No text location found');
   }
 
   // validate geo locations
   const parsedLocations = parseLocations(locations);
   if (parsedLocations.length > 1) {
-    throw new Error('Multiple locations found as text location');
+    throw new ValidationError('Multiple locations found as text location');
   }
 
   // parse text configurations
@@ -860,7 +886,7 @@ module.exports.parseText = (texts = '') => {
 
   // content configuration is required
   if (configs.text === undefined) {
-    throw new Error('content configuration is required');
+    throw new ValidationError('content configuration is required');
   }
 
   // build final text configurations
