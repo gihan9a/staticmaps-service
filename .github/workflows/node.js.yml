@@ -1,0 +1,48 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CACHE_DIRECTORY: ${{secrets.CACHE_DIRECTORY}}
+      CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
+      IMAGE_FORMAT_DEFAULT: ${{secrets.IMAGE_FORMAT_DEFAULT}}
+      IMAGE_HEIGHT_MAX: ${{secrets.IMAGE_HEIGHT_MAX}}
+      IMAGE_HEIGHT_MIN: ${{secrets.IMAGE_HEIGHT_MIN}}
+      IMAGE_WIDTH_MAX: ${{secrets.IMAGE_WIDTH_MAX}}
+      IMAGE_WIDTH_MIN: ${{secrets.IMAGE_WIDTH_MIN}}
+      MARKER_COLOR_DEFAULT: ${{secrets.MARKER_COLOR_DEFAULT}}
+      PATH_COLOR_DEFAULT: ${{secrets.PATH_COLOR_DEFAULT}}
+      POLYGON_FILL_COLOR_DEFAULT: ${{secrets.POLYGON_FILL_COLOR_DEFAULT}}
+      TEXT_COLOR: ${{secrets.TEXT_COLOR}}
+      TEXT_FILL_COLOR: ${{secrets.TEXT_FILL_COLOR}}
+      TEXT_FONT: ${{secrets.TEXT_FONT}}
+      TEXT_SIZE: ${{secrets.TEXT_SIZE}}
+      TEXT_WIDTH: ${{secrets.TEXT_WIDTH}}
+      ZOOM_MAX: ${{secrets.ZOOM_MAX}}
+      ZOOM_MIN: ${{secrets.ZOOM_MIN}}
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm run lint
+      - run: npm run test:cover
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report
+      - run: bash <(curl -s https://codecov.io/bash)
