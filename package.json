@@ -1,5 +1,5 @@
 {
-  "name": "staticmap-service",
+  "name": "staticmaps-service",
   "version": "1.0.0",
   "description": "Generate static map images as a service",
   "main": "index.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gihan10/staticmap-service.git"
+    "url": "git+https://github.com/gihan9a/staticmaps-service.git"
   },
   "keywords": [
     "staticmap",
@@ -24,9 +24,9 @@
   "author": "Gihan S <gihanshp@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gihan10/staticmap-service/issues"
+    "url": "https://github.com/gihan9a/staticmaps-service/issues"
   },
-  "homepage": "https://github.com/gihan10/staticmap-service#readme",
+  "homepage": "https://github.com/gihan9a/staticmaps-service#readme",
   "dependencies": {
     "between-range": "^1.0.0",
     "del": "^6.0.0",
