@@ -452,7 +452,7 @@ const getMarkerIcon = (value) => {
   const color = colorHexMap(value, true);
 
   // get the marker color image
-  return ['img', path.resolve(__dirname, `./assets/markers/${color}-32.png`)];
+  return ['img', path.resolve(__dirname, `../assets/markers/${color}-32.png`)];
 };
 
 /**
@@ -708,10 +708,7 @@ module.exports.parseMarkers = (markers = '') => {
   // validate geo locations
   const parsedLocations = parseLocations(locations);
   // default marker icon
-  const imgDefault = path.resolve(
-    __dirname,
-    `./assets/markers/${process.env.MARKER_COLOR_DEFAULT}-32.png`,
-  );
+  const [, imgDefault] = getMarkerIcon(colorHexMap(process.env.MARKER_COLOR_DEFAULT, true));
 
   // parse marker configurations
   const configs = parseConfigs(

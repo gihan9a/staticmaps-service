@@ -14,7 +14,7 @@ const {
   parsePath,
   parseText,
   getContentType,
-} = require('./utils');
+} = require('./utils/utils');
 
 const parseArguments = (query) => {
   const size = parseSize(query.size);
