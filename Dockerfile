@@ -1,5 +1,8 @@
 FROM node:lts-alpine
 
+# Install Liberation font to fix font issues
+RUN apk update && \
+    apk add --no-cache ttf-liberation
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci --only=production
