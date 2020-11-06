@@ -1,6 +1,6 @@
 ## Static Map Images as a Service
 
-![Logo](./assets/logo-96.png)
+![Logo](https://github.com/gihan9a/staticmaps-service/blob/main/assets/logo-96.png?raw=true)
 
 Generate static map images/thumbnails as a web service. It can be used as a microservice in your project.
 
@@ -19,17 +19,19 @@ Building out of the box product for generating static map images as a web servic
 
 ## Code style
 
-This project follows `Airbnb` javascript style guide.
+This project follows `Airbnb` javascript style guide and enforced by "Eslint". Run `npm run lint` to validate style adhearance.
 
 [![js-standard-style](https://img.shields.io/badge/code%20style-airbnb-brightgreen)](https://github.com/airbnb/javascript)
 
 ## Screenshots
 
-Images can be generated as follows using URL parameters
+Images can be generated using URL parameters as follows.
 
 `<your baseurl>?markers=40.714728,-73.998672|63.259591,-144.667969&size=200x200`
 
-![Screenshot](./.github/multiple-markers-200.jpeg)
+The above url will generate blow image.  
+
+![Screenshot](https://github.com/gihan9a/staticmaps-service/blob/main/.github/multiple-markers-200.jpeg?raw=true)
 
 ## Tech/framework used
 
@@ -40,7 +42,7 @@ Images can be generated as follows using URL parameters
 
 ## Features
 
-Following can be draw on a map using this API service thanks to [StaticMaps](https://www.npmjs.com/package/staticmaps).
+Following features can be draw on a map using this API service.
 
 - Markers
 - Paths
@@ -57,16 +59,49 @@ You can install this API as a docker image or as a bare Node.js web service
    3. Create configuration file by renaming `.env.sample` to `.env`
    4. Configure variables in `.env` file
    5. Start the web server using `npm start`
-2. Docker image @TODO
-   1. Pull the docker image from [Docker Hub](https://hub.docker.com)
-   2. Update your environment variables.
-   3. Run the docker container
+2. Docker image
+   1. Pull the docker image from [Docker Hub](https://hub.docker.com/r/gihan9a/staticmaps-service)
+   2. Run the docker container  
+      Eg. 
+
+      ```
+      docker container run -d \
+         -p 8080:8080 \
+         --volume /path/to/my/cache/folder:/cache \
+         gihan9a/staticmaps-service
+      ```
 3. As a serverless solution
    @TODO
 
+### Environment variables
+
+| Variable                   | Description                       | Default   |
+| -------------------------- | --------------------------------- | --------- |
+| PORT                       | Application port inside container | 8080      |
+| IMAGE_FORMAT_DEFAULT       | Default output image format       | jpg       |
+| IMAGE_HEIGHT_MAX           | Maximum output image height       | 1999      |
+| IMAGE_HEIGHT_MIN           | Minium output image height        | 1         |
+| IMAGE_WIDTH_MAX            | Maximum output image width        | 1999      |
+| IMAGE_WIDTH_MIN            | Minimum output image width        | 1         |
+| MARKER_COLOR_DEFAULT       | Default marker color              | orange    |
+| PATH_COLOR_DEFAULT         | Default path color                | #000000BB |
+| POLYGON_FILL_COLOR_DEFAULT | Default polygon fill color        | #00000088 |
+| TEXT_COLOR                 | Default text (stroke) color       | #000000BB |
+| TEXT_FILL_COLOR            | Default text fill color           | #000000BB |
+| TEXT_FONT                  | Default font family               | Arial     |
+| TEXT_SIZE                  | Default text size                 | 12        |
+| TEXT_WIDTH                 | Default text stoke width          | 1         |
+| ZOOM_MAX                   | Maximum zoom avaialble            | 20        |
+| ZOOM_MIN                   | Minimum zoom avaialble            | 1         |
+
+### Volumes
+
+`/cache` directory can be mounted as a volume to persist image caches
+
+
 ## Tests
 
-Tests can be found in `/test` directory. Tests can be run using `npm test`.
+Tests can be found in `/test` directory. Tests can be run using `npm test`. Please make sure you have working internet connection when running integration tests.
 
 ## How to use?
 
@@ -89,6 +124,6 @@ Map images and data provide by [Openstreetmap.org](https://www.openstreetmap.org
 This work is licensed under the terms of the MIT license.  
 For a copy, see <https://opensource.org/licenses/MIT>.
 
-The map samples are from © OpenStreetMap contributors
+Map images are provided by © OpenStreetMap contributors
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service?ref=badge_large)

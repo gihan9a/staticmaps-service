@@ -12,7 +12,7 @@ const {
   parsePath,
   parseText,
   getContentType,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 describe('Test utils.js functions', () => {
   describe('test getContentType function', () => {

@@ -14,7 +14,7 @@ const {
   parsePath,
   parseText,
   getContentType,
-} = require('./utils');
+} = require('./utils/utils');
 
 const parseArguments = (query) => {
   const size = parseSize(query.size);
@@ -70,6 +70,14 @@ module.exports = function build(options = {}) {
   const app = fastify(options);
   app.get('/', async (request, reply) => {
     try {
+      // if query is empty send nice message
+      if (Object.keys(request.query).length === 0) {
+        reply.type('application/json').code(200);
+        return {
+          data: 'Hello world',
+        };
+      }
+
       // parse and validate query parameters
       const params = parseArguments(request.query);
       const { isCached, path: imagePath } = getImageCacheData(params);
@@ -98,8 +106,10 @@ module.exports = function build(options = {}) {
     } catch (err) {
       // logo error
       if (process.env.NODE_ENV !== 'test') {
-        // eslint-disable-next-line no-console
-        console.log(err);
+        if (err.name === 'Error') {
+          // eslint-disable-next-line no-console
+          console.log(err);
+        }
       }
 
       // respond error

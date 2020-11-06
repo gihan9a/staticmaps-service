@@ -4,4 +4,6 @@ npm-debug.log
 .github
 .git
 .gitignore
-.env.sample
+.env*
+coverage
+cache/*
