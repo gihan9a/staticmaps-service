@@ -6,8 +6,8 @@ Generate static map images/thumbnails as a web service. It can be used as a micr
 
 [![License](https://img.shields.io/github/license/gihan9a/staticmaps-service)](https://github.com/gihan9a/staticmaps-service/blob/main/LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgihan10%2Fstaticmap-service?ref=badge_shield)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1a4d865272044212860e5c1b1a090c26)](https://app.codacy.com/gh/gihan9a/staticmaps-service?utm_source=github.com&utm_medium=referral&utm_content=gihan9a/staticmaps-service&utm_campaign=Badge_Grade)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/f4ea491b97724199a871de00ea437563)](https://www.codacy.com/gh/gihan9a/staticmaps-service/dashboard?utm_source=github.com&utm_medium=referral&utm_content=gihan9a/staticmaps-service&utm_campaign=Badge_Coverage)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/040142f2969a402b906f8729cd071251)](https://www.codacy.com/gh/gihan9a/staticmaps-service/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=gihan9a/staticmaps-service&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/040142f2969a402b906f8729cd071251)](https://www.codacy.com/gh/gihan9a/staticmaps-service/dashboard?utm_source=github.com&utm_medium=referral&utm_content=gihan9a/staticmaps-service&utm_campaign=Badge_Coverage)
 
 ## Motivation
 
