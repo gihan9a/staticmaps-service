@@ -33,7 +33,7 @@
     "dotenv": "^8.2.0",
     "fastify": "^3.10.1",
     "fastify-favicon": "^3.1.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "nodemon": "^2.0.7",
     "staticmaps": "^1.4.2",
